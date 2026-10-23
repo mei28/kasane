@@ -1,5 +1,5 @@
 /// The facts that decide whether blocking the built-in keyboard is safe.
-public struct Safety: Equatable, Sendable {
+public struct Safety: Codable, Equatable, Sendable {
     public var externalKeyboardConnected: Bool
     public var screenLocked: Bool
     public var onConsole: Bool

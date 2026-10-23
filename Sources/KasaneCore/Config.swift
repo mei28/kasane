@@ -12,6 +12,15 @@ public struct Config: Equatable, Sendable {
         self.paused = paused
     }
 
+    /// What kasaned writes on its first start: fn tapped twice on the built-in keyboard toggles,
+    /// and both Shift keys held on the external keyboard turn OFF.
+    public static let `default` = Config(
+        on: [Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))],
+        off: [
+            Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400))),
+            Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000))),
+        ])
+
     public static func parse(_ data: Data) throws -> Config {
         let config = try JSONDecoder().decode(Config.self, from: data)
         try config.validate()
@@ -59,7 +68,7 @@ public struct Config: Equatable, Sendable {
 
 /// A config that could leave the user without a working keyboard. kasaned refuses to start on
 /// any of these, so it never seizes the built-in keyboard with a bad config.
-public enum ConfigError: Error, Equatable {
+public enum ConfigError: Error, Codable, Equatable, Sendable {
     case noExternalOffTrigger
     case holdOnBuiltIn
     case unknownKey(String)

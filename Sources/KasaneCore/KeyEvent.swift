@@ -1,5 +1,5 @@
 /// A HID usage as IOKit reports it for one input element.
-public struct HIDUsage: Hashable, Sendable {
+public struct HIDUsage: Codable, Hashable, Sendable {
     public var page: UInt32
     public var usage: UInt32
 

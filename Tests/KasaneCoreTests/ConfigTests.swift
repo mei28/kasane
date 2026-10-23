@@ -112,3 +112,11 @@ func rejectsATapCountOutsideTwoToFive(_ count: Int) {
 
     #expect(try Config.parse(config.encoded()).paused)
 }
+
+@Test func theDefaultConfigTogglesWithFnAndIsValid() throws {
+    let fnToggle = Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))
+
+    #expect(Config.default.on == [fnToggle])
+    #expect(Config.default.off.contains(fnToggle))
+    #expect(try Config.parse(Config.default.encoded()) == Config.default)
+}

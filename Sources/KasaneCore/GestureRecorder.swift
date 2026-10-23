@@ -1,5 +1,5 @@
 /// Why a recording did not become a trigger.
-public enum RecordingError: Error, Equatable, Sendable {
+public enum RecordingError: Error, Codable, Equatable, Sendable {
     case nothingRecorded
     case singleTap
     case tooManyTaps(Int)
