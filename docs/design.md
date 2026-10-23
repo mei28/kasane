@@ -187,6 +187,10 @@ kasane のリポジトリは `~/Documents` の下にある。`~/Documents` は�
 | ロック中に `CGSSessionScreenIsLocked` が現れるか | `./lockwatch.sh 60` | 現れる。loginwindow のログと突き合わせると、Touch ID ボタンでのロック（09:14:58.6、09:15:04.8）の次の 1 秒ごとの読み取りで true になり、解除（09:15:00.2、09:15:08.8）の次の読み取りで消えた。ずれはポーリング間隔の 1 秒以内。ポーリングをやめる候補として、`IOMessage.h` に `kIOMessageConsoleSecurityChange` がある（未検証） |
 | kasaned を root で動かし、ON と OFF のトリガ、ロック、外付けの切断、スリープで期待どおりに切り替わるか | `just run <設定>` | 2026-10-23 に試し、内蔵の fn での切り替えを含めて問題なかった（ユーザの目視）。項目ごとの結果は記録していない |
 | 占有した瞬間に押されていた内蔵キーが、OS で押されたままにならないか | `just run <設定>` | 未 |
+| 自己署名のアプリから `SMAppService.daemon` で daemon を登録し、更新後も起動できるか | `spike/smappservice` | 登録はでき、ログイン項目で許可すると root で起動した。ただ、作り直して上書きすると `Launch Constraint Violation` で起動を拒まれ、launchd が登録を外した。Team ID のない署名では、登録したときのバイナリに固定されるとみられる。更新のたびに登録し直すことになるので使わない（2026-10-23） |
+| root の daemon の入力監視は、どの身元に結び付くか | `spike/smappservice` | daemon 自身の署名の識別子に結び付く。daemon は root なので許可のダイアログは出ない。アプリの中の補助 `.app` をシステム設定で追加すると、外側のアプリとして記録され、補助 `.app` には効かなかった。daemon をアプリと同じ識別子で署名すれば、アプリへの 1 回の許可で足りた |
+| `/Library/LaunchDaemons` の plist で、アプリの中の daemon を動かせるか | `spike/smappservice/install-plist.sh` | 動いた。入力監視の許可が効き、launchd の下でも内蔵キーボードを占有して解放できた。作り直して上書きし、`launchctl kickstart -k` で再起動しても、登録し直さずに起動し、許可も残った |
+| アプリと daemon の XPC で、同じ証明書で署名した相手だけを通せるか | `spike/smappservice` | `identifier "…" and certificate leaf = H"…"` を daemon が自分の署名から作って要件にすると、自己署名のアプリは接続でき、アドホック署名のクライアントは拒否された |
 | 外付けを載せたとき fn と Caps Lock が隠れるか。打鍵中にどの内蔵キーが押されるか | 目視 | fn と Caps Lock は隠れない前提で進める（2026-10-23 に決めた。目視はしていない）。打鍵中にどの内蔵キーが押されるかは未確認 |
 
 ## テストリスト
