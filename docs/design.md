@@ -168,7 +168,7 @@ kasaned には Input Monitoring の許可が要る見込みである（kanata �
 |---|---|
 | バイナリ | `/usr/local/bin/kasaned`（`just install` でビルド、署名、配置する） |
 | 設定ファイル | `~/dotfiles/.config/kasane/config.json` |
-| LaunchDaemon | dotfiles の `.config/nix/nix-darwin/config/kasane.nix`。ラベルは `dev.mei.kasaned` |
+| LaunchDaemon | ラベルは `dev.mei.kasaned`。まず `just daemon-load` で `launchd/dev.mei.kasaned.plist` から手で登録して動作を確かめ、そのあと dotfiles の nix-darwin の設定へ移す |
 | ログ | `/var/log/kasaned.log`（`just logs` で追う） |
 
 kasane のリポジトリは `~/Documents` の下にある。`~/Documents` はプライバシー保護の対象なので、root の daemon からは読めない。そのため、設定ファイルは dotfiles に置く。

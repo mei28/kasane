@@ -48,11 +48,13 @@ just run examples/config.json    # run kasaned as root against a config
    rebuilds.
 2. `just install` builds kasaned for release, signs it, installs it to `/usr/local/bin/kasaned`,
    and restarts the daemon if it is loaded.
-3. Register the daemon. Mine is in my nix-darwin config as `dev.mei.kasaned`, with the config
-   file path as its only argument and `StandardErrorPath` set to `/var/log/kasaned.log`.
-4. Grant `/usr/local/bin/kasaned` Input Monitoring in System Settings, then restart the daemon.
+3. `just daemon-load <config>` registers the daemon as `dev.mei.kasaned` from
+   `launchd/dev.mei.kasaned.plist`. Keep the config outside `~/Documents`, which root cannot read.
+   A nix-darwin config can register the same plist instead.
+4. Grant `/usr/local/bin/kasaned` Input Monitoring in System Settings, then restart the daemon
+   with `sudo launchctl kickstart -k system/dev.mei.kasaned`.
 
-`just logs` follows the log.
+`just logs` follows the log, and `just daemon-unload` removes the daemon.
 
 ## Documentation
 

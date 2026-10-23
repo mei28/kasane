@@ -29,6 +29,17 @@ install:
     sudo install -o root -g wheel -m 755 .build/release/kasaned {{installed}}
     if sudo launchctl print system/{{label}} >/dev/null 2>&1; then sudo launchctl kickstart -k system/{{label}}; fi
 
+# Register kasaned as a LaunchDaemon by hand, reading config. Root cannot read ~/Documents, so keep config elsewhere.
+daemon-load config:
+    sed "s|@CONFIG@|$(realpath {{config}})|" launchd/{{label}}.plist | sudo tee /Library/LaunchDaemons/{{label}}.plist >/dev/null
+    plutil -lint /Library/LaunchDaemons/{{label}}.plist
+    sudo launchctl bootstrap system /Library/LaunchDaemons/{{label}}.plist
+
+# Stop and unregister a LaunchDaemon registered with daemon-load
+daemon-unload:
+    sudo launchctl bootout system/{{label}}
+    sudo rm /Library/LaunchDaemons/{{label}}.plist
+
 # Follow the LaunchDaemon's log
 logs:
     tail -f /var/log/kasaned.log
