@@ -1,0 +1,12 @@
+{
+  "externalKeyboards": [
+    { "name": "HHKB", "vendorID": 1278, "productID": 33 }
+  ],
+  "on": [
+    { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
+  ],
+  "off": [
+    { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
+    { "device": "external", "gesture": "doubleTap", "key": "rightCommand", "withinMs": 400 }
+  ]
+}
