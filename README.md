@@ -14,13 +14,17 @@ any other process. When the daemon exits, even by crashing, the kernel ends the 
 
 kasaned keeps the block on only while all of these hold:
 
-- at least one external keyboard from the vendor/product ID allowlist is connected
+- at least one keyboard other than the built-in one is connected
 - the screen is unlocked and the user is on the console
 - the system is awake
 
 When any of them stops holding, kasaned releases the built-in keyboard and stays off until the
 next ON trigger. Pressing the Touch ID button locks the screen, so the block can be released
 without touching a key.
+
+Any keyboard that is not built in counts, including devices that only look like one, such as a
+YubiKey. With nothing else connected, ON would leave no keyboard that can type; locking the screen
+with the Touch ID button or closing the lid still turns it OFF.
 
 ON and OFF triggers (a double tap, or holding keys together) are set in a JSON file. OFF triggers
 can only be placed on the external keyboard. The Caps Lock LED on the built-in keyboard shows
@@ -34,9 +38,6 @@ Developed on macOS 26 on an Apple silicon MacBook.
 just test                        # run the KasaneCore tests
 just run examples/config.json    # run kasaned as root against a config
 ```
-
-Find an external keyboard's vendor and product IDs in kasaned's log: it prints every keyboard it
-sees, including the ones it ignores.
 
 ## Documentation
 
