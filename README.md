@@ -3,8 +3,8 @@
 kasane blocks a MacBook's built-in keyboard while an external keyboard sits on top of it, and
 releases the block whenever the external keyboard might not be usable.
 
-Status: the core logic and the daemon are written, and the core logic is tested. The daemon has
-not yet been run as root with an external keyboard, and installation is not set up.
+Status: the core logic is tested, and the daemon works when run by hand as root with
+`just run`. Installation as a LaunchDaemon is not set up yet.
 
 ## How it works
 
