@@ -136,16 +136,11 @@ extension Trigger: Codable {
             try container.encode(GestureName.tap, forKey: .gesture)
             try container.encode(key, forKey: .key)
             try container.encode(count, forKey: .count)
-            try container.encode(Self.milliseconds(window), forKey: .withinMs)
+            try container.encode(window.wholeMilliseconds, forKey: .withinMs)
         case .hold(let keys, let duration):
             try container.encode(GestureName.hold, forKey: .gesture)
             try container.encode(keys.sorted { $0.rawValue < $1.rawValue }, forKey: .keys)
-            try container.encode(Self.milliseconds(duration), forKey: .forMs)
+            try container.encode(duration.wholeMilliseconds, forKey: .forMs)
         }
-    }
-
-    private static func milliseconds(_ duration: Duration) -> Int {
-        let (seconds, attoseconds) = duration.components
-        return Int(seconds) * 1000 + Int(attoseconds / 1_000_000_000_000_000)
     }
 }

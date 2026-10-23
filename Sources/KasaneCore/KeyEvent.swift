@@ -24,3 +24,11 @@ public struct KeyEvent: Equatable, Sendable {
         self.time = time
     }
 }
+
+extension Duration {
+    /// The whole milliseconds in this duration, for the config's millisecond fields.
+    var wholeMilliseconds: Int {
+        let (seconds, attoseconds) = components
+        return Int(seconds) * 1000 + Int(attoseconds / 1_000_000_000_000_000)
+    }
+}

@@ -62,15 +62,15 @@ public struct GestureRecorder: Sendable {
             let lastDown = presses.map(\.down).max()!
             let firstUp = presses.compactMap(\.up).min()!
             guard lastDown < firstUp else { return .failure(.notHeldTogether) }
-            let held = milliseconds(firstUp - lastDown) / 100 * 100
-            guard held >= milliseconds(Self.holdThreshold) else { return .failure(.holdTooShort) }
+            let held = (firstUp - lastDown).wholeMilliseconds / 100 * 100
+            guard held >= Self.holdThreshold.wholeMilliseconds else { return .failure(.holdTooShort) }
             return .success(Trigger(device: first.device, gesture: .hold(Set(keys), for: .milliseconds(held))))
         }
         guard presses.count >= 2 else { return .failure(.singleTap) }
         guard presses.count <= 5 else { return .failure(.tooManyTaps(presses.count)) }
         let key = keys[0]
         guard keys.allSatisfy({ $0 == key }) else { return .failure(.tapsOnSeveralKeys) }
-        let span = milliseconds(presses[presses.count - 1].down - first.down)
+        let span = (presses[presses.count - 1].down - first.down).wholeMilliseconds
         // Half again the measured span leaves room for a slower attempt, in steps of 50 ms.
         let window = (span * 3 / 2 + 49) / 50 * 50
         return .success(
@@ -91,10 +91,5 @@ public struct GestureRecorder: Sendable {
                 earlier.down < later.down && earlier.up.map { later.down < $0 } ?? true
             }
         }
-    }
-
-    private func milliseconds(_ duration: Duration) -> Int {
-        let (seconds, attoseconds) = duration.components
-        return Int(seconds) * 1000 + Int(attoseconds / 1_000_000_000_000_000)
     }
 }
