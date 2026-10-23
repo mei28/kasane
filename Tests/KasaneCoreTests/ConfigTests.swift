@@ -48,20 +48,32 @@ private func configJSON(
     }
 }
 
-@Test func rejectsAnOffTriggerOnTheBuiltInKeyboard() {
+@Test func acceptsAnOffTriggerOnTheBuiltInKeyboard() throws {
     let off = #"""
         [
           { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
           { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
         ]
         """#
-    #expect(throws: ConfigError.builtInOffTrigger) {
-        try Config.parse(configJSON(off: off))
-    }
+    let config = try Config.parse(configJSON(off: off))
+
+    #expect(config.off.contains(Trigger(device: .builtIn, gesture: .doubleTap(.fn, within: .milliseconds(400)))))
 }
 
 @Test func rejectsAnUnknownKeyName() {
     #expect(throws: ConfigError.unknownKey("capsLok")) {
         try Config.parse(configJSON(on: #"[{ "device": "builtIn", "gesture": "doubleTap", "key": "capsLok", "withinMs": 400 }]"#))
+    }
+}
+
+@Test func rejectsHoldOnTheBuiltInKeyboardInOff() {
+    let off = #"""
+        [
+          { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
+          { "device": "builtIn", "gesture": "hold", "keys": ["fn"], "forMs": 1000 }
+        ]
+        """#
+    #expect(throws: ConfigError.holdOnBuiltIn) {
+        try Config.parse(configJSON(off: off))
     }
 }

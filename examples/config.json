@@ -4,6 +4,7 @@
   ],
   "off": [
     { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
-    { "device": "external", "gesture": "doubleTap", "key": "rightCommand", "withinMs": 400 }
+    { "device": "external", "gesture": "doubleTap", "key": "rightCommand", "withinMs": 400 },
+    { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
   ]
 }

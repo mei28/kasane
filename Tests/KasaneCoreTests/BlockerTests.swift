@@ -95,3 +95,18 @@ func onTriggerChecksTheLatestSafetyConditions(_ safety: Safety) {
 
     #expect(!blocker.isOn)
 }
+
+@Test func aGestureInBothListsTurnsOnWhileOff() {
+    var blocker = Blocker(safety: safe)
+
+    #expect(blocker.triggered(on: true, off: true) == [.seize, .ledOn])
+    #expect(blocker.isOn)
+}
+
+@Test func aGestureInBothListsTurnsOffWhileOn() {
+    var blocker = Blocker(safety: safe)
+    _ = blocker.onTrigger()
+
+    #expect(blocker.triggered(on: true, off: true) == [.ledOff, .release])
+    #expect(!blocker.isOn)
+}

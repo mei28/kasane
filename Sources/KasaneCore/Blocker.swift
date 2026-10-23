@@ -47,6 +47,16 @@ public struct Blocker: Sendable {
         return turnOff()
     }
 
+    /// Handles the triggers that fired on one event. Only the triggers that can change the current
+    /// state count, so one gesture listed under both `on` and `off` toggles.
+    public mutating func triggered(on: Bool, off: Bool) -> [Effect] {
+        if isOn {
+            off ? offTrigger() : []
+        } else {
+            on ? onTrigger() : []
+        }
+    }
+
     public mutating func update(_ safety: Safety) -> [Effect] {
         self.safety = safety
         guard isOn, !safety.permitsBlocking else { return [] }

@@ -61,15 +61,11 @@ final class Daemon {
     }
 
     private func react(onFired: Bool, offFired: Bool) {
-        if offFired {
-            transition("OFF trigger") { $0.offTrigger() }
+        guard onFired || offFired else { return }
+        if onFired && !blocker.isOn && !safety.permitsBlocking {
+            log("ON trigger refused; \(describe(safety))")
         }
-        if onFired {
-            if !blocker.isOn && !safety.permitsBlocking {
-                log("ON trigger refused; \(describe(safety))")
-            }
-            transition("ON trigger") { $0.onTrigger() }
-        }
+        transition(blocker.isOn ? "OFF trigger" : "ON trigger") { $0.triggered(on: onFired, off: offFired) }
     }
 
     private func updateSafety(_ change: (inout Safety) -> Void) {

@@ -19,12 +19,8 @@ public struct Config: Equatable, Sendable {
         guard off.contains(where: { $0.device == .external }) else {
             throw .noExternalOffTrigger
         }
-        // Typing on the external keyboard can press built-in keys, which could turn kasane off.
-        guard off.allSatisfy({ $0.device == .external }) else {
-            throw .builtInOffTrigger
-        }
         // The external keyboard's weight alone could hold a built-in key down.
-        for trigger in on where trigger.device == .builtIn {
+        for trigger in on + off where trigger.device == .builtIn {
             if case .hold = trigger.gesture { throw .holdOnBuiltIn }
         }
     }
@@ -35,7 +31,6 @@ public struct Config: Equatable, Sendable {
 public enum ConfigError: Error, Equatable {
     case noExternalOffTrigger
     case holdOnBuiltIn
-    case builtInOffTrigger
     case unknownKey(String)
 }
 
