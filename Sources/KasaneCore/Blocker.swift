@@ -13,7 +13,7 @@ public struct Safety: Equatable, Sendable {
     }
 
     /// Blocking is safe only while some keyboard other than the built-in one can still type.
-    var permitsBlocking: Bool {
+    public var permitsBlocking: Bool {
         externalKeyboardConnected && !screenLocked && onConsole && !asleep
     }
 }
