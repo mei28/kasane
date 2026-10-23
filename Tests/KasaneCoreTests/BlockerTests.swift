@@ -110,3 +110,48 @@ func onTriggerChecksTheLatestSafetyConditions(_ safety: Safety) {
     #expect(blocker.triggered(on: true, off: true) == [.ledOff, .release])
     #expect(!blocker.isOn)
 }
+
+@Test func pausingWhileOnTurnsOffAndAsksToTurnTheLEDOffAndRelease() {
+    var blocker = Blocker(safety: safe)
+    _ = blocker.onTrigger()
+
+    #expect(blocker.pause() == [.ledOff, .release])
+    #expect(!blocker.isOn)
+    #expect(blocker.isPaused)
+}
+
+@Test func pausingWhileOffOnlyPauses() {
+    var blocker = Blocker(safety: safe)
+
+    #expect(blocker.pause() == [])
+    #expect(!blocker.isOn)
+    #expect(blocker.isPaused)
+}
+
+@Test func triggersDoNothingWhilePaused() {
+    var blocker = Blocker(safety: safe)
+    _ = blocker.pause()
+
+    #expect(blocker.triggered(on: true, off: true) == [])
+    #expect(blocker.onTrigger() == [])
+    #expect(!blocker.isOn)
+}
+
+@Test func resumingDoesNotTurnOn() {
+    var blocker = Blocker(safety: safe)
+    _ = blocker.onTrigger()
+    _ = blocker.pause()
+
+    blocker.resume()
+
+    #expect(!blocker.isPaused)
+    #expect(!blocker.isOn)
+    #expect(blocker.onTrigger() == [.seize, .ledOn])
+}
+
+@Test func startsPausedWhenAsked() {
+    var blocker = Blocker(safety: safe, paused: true)
+
+    #expect(blocker.isPaused)
+    #expect(blocker.onTrigger() == [])
+}

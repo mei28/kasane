@@ -30,14 +30,16 @@ public enum Effect: Equatable, Sendable {
 /// Decides when the built-in keyboard is blocked (ON) and what kasaned must do about it.
 public struct Blocker: Sendable {
     public private(set) var isOn = false
+    public private(set) var isPaused: Bool
     private var safety: Safety
 
-    public init(safety: Safety) {
+    public init(safety: Safety, paused: Bool = false) {
         self.safety = safety
+        isPaused = paused
     }
 
     public mutating func onTrigger() -> [Effect] {
-        guard !isOn, safety.permitsBlocking else { return [] }
+        guard !isOn, !isPaused, safety.permitsBlocking else { return [] }
         isOn = true
         return [.seize, .ledOn]
     }
@@ -61,6 +63,16 @@ public struct Blocker: Sendable {
         self.safety = safety
         guard isOn, !safety.permitsBlocking else { return [] }
         return turnOff()
+    }
+
+    public mutating func pause() -> [Effect] {
+        isPaused = true
+        return isOn ? turnOff() : []
+    }
+
+    /// Resuming leaves kasane OFF; the next ON trigger turns it ON.
+    public mutating func resume() {
+        isPaused = false
     }
 
     /// kasaned no longer holds the built-in keyboard: seizing it failed, or it disappeared. There
