@@ -3,7 +3,8 @@
 kasane blocks a MacBook's built-in keyboard while an external keyboard sits on top of it, and
 releases the block whenever the external keyboard might not be usable.
 
-Status: the hardware checks are done; the daemon is not implemented yet.
+Status: the core logic and the daemon are written, and the core logic is tested. The daemon has
+not yet been run as root with an external keyboard, and installation is not set up.
 
 ## How it works
 
@@ -26,6 +27,16 @@ can only be placed on the external keyboard. The Caps Lock LED on the built-in k
 the state; the setup assumes Caps Lock is remapped to Control.
 
 Developed on macOS 26 on an Apple silicon MacBook.
+
+## Usage
+
+```sh
+just test                        # run the KasaneCore tests
+just run examples/config.json    # run kasaned as root against a config
+```
+
+Find an external keyboard's vendor and product IDs in kasaned's log: it prints every keyboard it
+sees, including the ones it ignores.
 
 ## Documentation
 
