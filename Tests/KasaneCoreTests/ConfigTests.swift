@@ -4,9 +4,6 @@ import Testing
 
 private let exampleConfig = """
     {
-      "externalKeyboards": [
-        { "name": "HHKB", "vendorID": 1278, "productID": 33 }
-      ],
       "on": [
         { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
       ],
@@ -19,11 +16,10 @@ private let exampleConfig = """
 
 /// A valid config with one part replaced, to test each validation rule on its own.
 private func configJSON(
-    externalKeyboards: String = #"[{ "name": "HHKB", "vendorID": 1278, "productID": 33 }]"#,
     on: String = #"[{ "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }]"#,
     off: String = #"[{ "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 }]"#
 ) -> Data {
-    Data(#"{ "externalKeyboards": \#(externalKeyboards), "on": \#(on), "off": \#(off) }"#.utf8)
+    Data(#"{ "on": \#(on), "off": \#(off) }"#.utf8)
 }
 
 @Test func acceptsTheExampleConfig() throws {
@@ -32,7 +28,6 @@ private func configJSON(
     #expect(
         config
             == Config(
-                externalKeyboards: [ExternalKeyboard(name: "HHKB", vendorID: 1278, productID: 33)],
                 on: [Trigger(device: .builtIn, gesture: .doubleTap(.fn, within: .milliseconds(400)))],
                 off: [
                     Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000))),
@@ -62,12 +57,6 @@ private func configJSON(
         """#
     #expect(throws: ConfigError.builtInOffTrigger) {
         try Config.parse(configJSON(off: off))
-    }
-}
-
-@Test func rejectsEmptyExternalKeyboards() {
-    #expect(throws: ConfigError.noExternalKeyboards) {
-        try Config.parse(configJSON(externalKeyboards: "[]"))
     }
 }
 

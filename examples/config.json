@@ -1,7 +1,4 @@
 {
-  "externalKeyboards": [
-    { "name": "HHKB", "vendorID": 1278, "productID": 33 }
-  ],
   "on": [
     { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
   ],

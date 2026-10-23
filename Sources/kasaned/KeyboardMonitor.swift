@@ -9,18 +9,16 @@ protocol KeyboardMonitorDelegate: AnyObject {
     func keyEvent(_ event: KeyEvent)
 }
 
-/// Finds the built-in keyboard and the allowlisted external keyboards, and turns their key
-/// input into KeyEvents. Other keyboards, such as virtual ones, are left alone.
+/// Finds the built-in keyboard and the external keyboards, and turns their key input into
+/// KeyEvents. Every keyboard that is not built in counts as external as soon as it connects.
 @MainActor
 final class KeyboardMonitor {
-    private let config: Config
     private unowned let delegate: any KeyboardMonitorDelegate
     private let manager: IOHIDManager
     private var builtIn: IOHIDDevice?
     private var externals: [IOHIDDevice] = []
 
-    init(config: Config, delegate: any KeyboardMonitorDelegate) {
-        self.config = config
+    init(delegate: any KeyboardMonitorDelegate) {
         self.delegate = delegate
         manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
         let matching: [String: Any] = [
@@ -58,7 +56,7 @@ final class KeyboardMonitor {
             log("built-in keyboard: \(label)")
             observeInput(of: device)
             delegate.builtInKeyboardAppeared(device)
-        } else if let vendorID, let productID, config.isAllowlisted(vendorID: vendorID, productID: productID) {
+        } else {
             let result = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
             guard result == kIOReturnSuccess else {
                 log("\(IOKitError(operation: "open external keyboard \(label)", code: result)); not counting it")
@@ -68,8 +66,6 @@ final class KeyboardMonitor {
             log("external keyboard connected: \(label)")
             observeInput(of: device)
             delegate.externalKeyboardCountChanged(externals.count)
-        } else {
-            log("ignoring keyboard not on the allowlist: \(label)")
         }
     }
 

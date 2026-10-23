@@ -1,12 +1,10 @@
 import Foundation
 
 public struct Config: Equatable, Sendable {
-    public var externalKeyboards: [ExternalKeyboard]
     public var on: [Trigger]
     public var off: [Trigger]
 
-    public init(externalKeyboards: [ExternalKeyboard], on: [Trigger], off: [Trigger]) {
-        self.externalKeyboards = externalKeyboards
+    public init(on: [Trigger], off: [Trigger]) {
         self.on = on
         self.off = off
     }
@@ -17,17 +15,7 @@ public struct Config: Equatable, Sendable {
         return config
     }
 
-    /// Whether a connected keyboard counts as an external keyboard. Matching on IDs instead of
-    /// "any keyboard but the built-in one" keeps YubiKeys, receivers, and virtual keyboards out.
-    public func isAllowlisted(vendorID: Int, productID: Int) -> Bool {
-        externalKeyboards.contains { $0.vendorID == vendorID && $0.productID == productID }
-    }
-
     private func validate() throws(ConfigError) {
-        // With no allowlisted keyboard, the safety conditions can never hold.
-        guard !externalKeyboards.isEmpty else {
-            throw .noExternalKeyboards
-        }
         guard off.contains(where: { $0.device == .external }) else {
             throw .noExternalOffTrigger
         }
@@ -45,7 +33,6 @@ public struct Config: Equatable, Sendable {
 /// A config that could leave the user without a working keyboard. kasaned refuses to start on
 /// any of these, so it never seizes the built-in keyboard with a bad config.
 public enum ConfigError: Error, Equatable {
-    case noExternalKeyboards
     case noExternalOffTrigger
     case holdOnBuiltIn
     case builtInOffTrigger
@@ -53,18 +40,6 @@ public enum ConfigError: Error, Equatable {
 }
 
 extension Config: Decodable {}
-
-public struct ExternalKeyboard: Decodable, Equatable, Sendable {
-    public var name: String
-    public var vendorID: Int
-    public var productID: Int
-
-    public init(name: String, vendorID: Int, productID: Int) {
-        self.name = name
-        self.vendorID = vendorID
-        self.productID = productID
-    }
-}
 
 public enum Device: String, Decodable, Sendable {
     case builtIn

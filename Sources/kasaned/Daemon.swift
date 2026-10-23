@@ -9,7 +9,6 @@ final class Daemon {
     /// How often the console state is read and hold triggers are checked.
     private static let tickInterval: CFTimeInterval = 0.2
 
-    private let config: Config
     private let registryRoot: io_registry_entry_t
     private var safety: Safety
     private var blocker: Blocker
@@ -20,7 +19,6 @@ final class Daemon {
     private var power: PowerMonitor?
 
     init(config: Config) {
-        self.config = config
         registryRoot = IORegistryGetRootEntry(kIOMainPortDefault)
         let console = readConsoleState(registryRoot)
         safety = Safety(
@@ -33,7 +31,7 @@ final class Daemon {
 
     func start() throws(IOKitError) {
         log("starting OFF; \(describe(safety))")
-        keyboards = KeyboardMonitor(config: config, delegate: self)
+        keyboards = KeyboardMonitor(delegate: self)
         power = try PowerMonitor(delegate: self)
         let timer = CFRunLoopTimerCreateWithHandler(
             kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + Self.tickInterval, Self.tickInterval, 0, 0
