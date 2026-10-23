@@ -17,6 +17,12 @@ public struct Config: Equatable, Sendable {
         return config
     }
 
+    /// Whether a connected keyboard counts as an external keyboard. Matching on IDs instead of
+    /// "any keyboard but the built-in one" keeps YubiKeys, receivers, and virtual keyboards out.
+    public func isAllowlisted(vendorID: Int, productID: Int) -> Bool {
+        externalKeyboards.contains { $0.vendorID == vendorID && $0.productID == productID }
+    }
+
     private func validate() throws(ConfigError) {
         // With no allowlisted keyboard, the safety conditions can never hold.
         guard !externalKeyboards.isEmpty else {
