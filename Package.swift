@@ -12,5 +12,7 @@ let package = Package(
         .target(name: "KasaneIPC"),
         // The root daemon: IOKit glue around KasaneCore, checked on the hardware.
         .executableTarget(name: "kasaned", dependencies: ["KasaneCore", "KasaneIPC"]),
+        // The menu bar app. `just app` puts it and kasaned into Kasane.app.
+        .executableTarget(name: "Kasane", dependencies: ["KasaneCore", "KasaneIPC"]),
     ]
 )

@@ -1,0 +1,696 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "A key was still down when the recording ended.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記録が終わったとき、まだ押されているキーがありました。"
+          }
+        }
+      }
+    },
+    "A tap trigger needs 2 to 5 taps, not %lld.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タップの回数は 2〜5 回にしてください（今は %lld 回です）。"
+          }
+        }
+      }
+    },
+    "About Kasane": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane について"
+          }
+        }
+      }
+    },
+    "Add Kasane under Input Monitoring, then wait a few seconds.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力監視に Kasane を追加して、数秒待ってください。"
+          }
+        }
+      }
+    },
+    "Add at least one trigger on the external keyboard that turns Kasane off.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けキーボードで OFF にするトリガを、少なくとも 1 つ置いてください。"
+          }
+        }
+      }
+    },
+    "All taps within %lld ms": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ms 以内にすべてタップ"
+          }
+        }
+      }
+    },
+    "Another recording is in progress.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ほかの記録が進んでいます。"
+          }
+        }
+      }
+    },
+    "Applied.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "適用しました。"
+          }
+        }
+      }
+    },
+    "Apply": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "適用"
+          }
+        }
+      }
+    },
+    "Block the Built-in Keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードを止める"
+          }
+        }
+      }
+    },
+    "Built-in keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボード"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャンセル"
+          }
+        }
+      }
+    },
+    "Cannot reach kasaned": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned につながりません"
+          }
+        }
+      }
+    },
+    "Cannot reach kasaned.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned につながりません。"
+          }
+        }
+      }
+    },
+    "Cannot read the config from kasaned: %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned から設定を読めません：%@"
+          }
+        }
+      }
+    },
+    "External keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けキーボード"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般"
+          }
+        }
+      }
+    },
+    "Held for %lld ms": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ms 押し続ける"
+          }
+        }
+      }
+    },
+    "Hold %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ を押し続ける"
+          }
+        }
+      }
+    },
+    "Hold all the keys down at the same time.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのキーを同時に押し続けてください。"
+          }
+        }
+      }
+    },
+    "Hold the keys for at least half a second.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キーを 0.5 秒以上押し続けてください。"
+          }
+        }
+      }
+    },
+    "Input Monitoring is not granted to Kasane": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane に入力監視が許可されていません"
+          }
+        }
+      }
+    },
+    "Kasane Settings": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane の設定"
+          }
+        }
+      }
+    },
+    "Kasane cannot start": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane を起動できません"
+          }
+        }
+      }
+    },
+    "Kasane is paused": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane は一時停止中です"
+          }
+        }
+      }
+    },
+    "Keys came from both keyboards. Use one keyboard.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 つのキーボードからキーが届きました。1 つのキーボードで押してください。"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "言語"
+          }
+        }
+      }
+    },
+    "Launch at login": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ログイン時に起動"
+          }
+        }
+      }
+    },
+    "Left Command": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左 Command"
+          }
+        }
+      }
+    },
+    "Left Control": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左 Control"
+          }
+        }
+      }
+    },
+    "Left Option": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左 Option"
+          }
+        }
+      }
+    },
+    "Left Shift": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左 Shift"
+          }
+        }
+      }
+    },
+    "No built-in keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードが見つかりません"
+          }
+        }
+      }
+    },
+    "No key was pressed.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キーが押されませんでした。"
+          }
+        }
+      }
+    },
+    "One tap cannot be a trigger. Tap 2 to 5 times.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 回のタップはトリガにできません。2〜5 回タップしてください。"
+          }
+        }
+      }
+    },
+    "Only fn and the modifier keys can be triggers.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トリガにできるのは、fn と修飾キーだけです。"
+          }
+        }
+      }
+    },
+    "Open Input Monitoring Settings…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力監視の設定を開く…"
+          }
+        }
+      }
+    },
+    "Pause Kasane": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane を一時停止"
+          }
+        }
+      }
+    },
+    "Press the keys for the new trigger. Recording ends one second after you let go.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいトリガのキーを押してください。手を離して 1 秒たつと、記録が終わります。"
+          }
+        }
+      }
+    },
+    "Quit Kasane": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane を終了"
+          }
+        }
+      }
+    },
+    "Record a Trigger…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トリガを記録…"
+          }
+        }
+      }
+    },
+    "Recording a trigger…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トリガを記録しています…"
+          }
+        }
+      }
+    },
+    "Relaunch Kasane": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane を再起動"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除"
+          }
+        }
+      }
+    },
+    "Resume Kasane": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kasane を再開"
+          }
+        }
+      }
+    },
+    "Revert": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元に戻す"
+          }
+        }
+      }
+    },
+    "Right Command": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右 Command"
+          }
+        }
+      }
+    },
+    "Right Control": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右 Control"
+          }
+        }
+      }
+    },
+    "Right Option": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右 Option"
+          }
+        }
+      }
+    },
+    "Right Shift": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右 Shift"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定…"
+          }
+        }
+      }
+    },
+    "System default": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システムの設定"
+          }
+        }
+      }
+    },
+    "Tap %@ %lld times": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ を %2$lld 回タップ"
+          }
+        }
+      }
+    },
+    "Tap one key only.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 つのキーだけをタップしてください。"
+          }
+        }
+      }
+    },
+    "Taps of %@ on the %@ use different counts. Use one count per key.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ の %1$@ のタップで、回数がそろっていません。1 つのキーでは回数をそろえてください。"
+          }
+        }
+      }
+    },
+    "That was %lld taps. Tap 2 to 5 times.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 回のタップでした。2〜5 回タップしてください。"
+          }
+        }
+      }
+    },
+    "The built-in keyboard cannot have hold triggers: the external keyboard's weight could hold a key down.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードには、押し続けるトリガを置けません。外付けキーボードの重みで、キーが押されたままになることがあるためです。"
+          }
+        }
+      }
+    },
+    "The built-in keyboard is blocked": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードを止めています"
+          }
+        }
+      }
+    },
+    "The built-in keyboard works": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードは使えます"
+          }
+        }
+      }
+    },
+    "The menu bar updates after a relaunch.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーは、再起動すると切り替わります。"
+          }
+        }
+      }
+    },
+    "Toggles": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切り替える"
+          }
+        }
+      }
+    },
+    "Triggers": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トリガ"
+          }
+        }
+      }
+    },
+    "Turns off": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OFF にする"
+          }
+        }
+      }
+    },
+    "Turns on": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ON にする"
+          }
+        }
+      }
+    },
+    "Unblock the Built-in Keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードを戻す"
+          }
+        }
+      }
+    },
+    "Unknown key: %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知らないキーです：%@"
+          }
+        }
+      }
+    },
+    "Waiting for an external keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けキーボードを待っています"
+          }
+        }
+      }
+    },
+    "kasaned cannot use its config file": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned が設定ファイルを使えません"
+          }
+        }
+      }
+    },
+    "kasaned could not use its config file: %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned が設定ファイルを使えませんでした：%@"
+          }
+        }
+      }
+    }
+  }
+}

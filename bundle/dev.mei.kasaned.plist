@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Installed to /Library/LaunchDaemons by `just install`. kasaned runs from inside Kasane.app. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>dev.mei.kasaned</string>
+	<key>Program</key>
+	<string>/Applications/Kasane.app/Contents/MacOS/kasaned</string>
+	<key>MachServices</key>
+	<dict>
+		<key>dev.mei.kasane.daemon</key>
+		<true/>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/var/log/kasaned.log</string>
+</dict>
+</plist>

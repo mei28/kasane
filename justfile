@@ -1,4 +1,8 @@
 signing_identity := "kasane code signing"
+app := ".build/Kasane.app"
+installed := "/Applications/Kasane.app"
+daemon_label := "dev.mei.kasaned"
+daemon_plist := "/Library/LaunchDaemons/dev.mei.kasaned.plist"
 
 default:
     @just --list
@@ -14,6 +18,36 @@ test:
 # Create the self-signed identity the app is signed with (once per Mac)
 signing-identity:
     scripts/create-signing-identity.sh "{{signing_identity}}"
+
+# Build Kasane.app with kasaned inside. Both are signed as dev.mei.kasane, so one Input Monitoring grant covers both.
+app:
+    swift build -c release --product Kasane
+    swift build -c release --product kasaned
+    rm -rf {{app}}
+    mkdir -p {{app}}/Contents/MacOS {{app}}/Contents/Resources
+    cp bundle/Info.plist {{app}}/Contents/
+    cp .build/release/Kasane .build/release/kasaned {{app}}/Contents/MacOS/
+    xcrun xcstringstool compile bundle/Localizable.xcstrings --output-directory {{app}}/Contents/Resources
+    codesign --force --sign "{{signing_identity}}" --identifier dev.mei.kasane {{app}}/Contents/MacOS/kasaned
+    codesign --force --sign "{{signing_identity}}" --identifier dev.mei.kasane {{app}}
+    codesign --verify --strict {{app}}
+
+# Install Kasane.app root-owned in /Applications, (re)start kasaned, and open the app
+install: app
+    if pgrep -x Kasane >/dev/null; then pkill -x Kasane; fi
+    sudo rm -rf {{installed}}
+    sudo ditto {{app}} {{installed}}
+    sudo chown -R root:wheel {{installed}}
+    sudo install -o root -g wheel -m 644 bundle/{{daemon_label}}.plist {{daemon_plist}}
+    if sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl kickstart -k system/{{daemon_label}}; else sudo launchctl bootstrap system {{daemon_plist}}; fi
+    open {{installed}}
+
+# Stop kasaned and remove Kasane.app and the LaunchDaemon (the config in /Library/Application Support/Kasane stays)
+uninstall:
+    if pgrep -x Kasane >/dev/null; then pkill -x Kasane; fi
+    if sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl bootout system/{{daemon_label}}; fi
+    sudo rm -f {{daemon_plist}}
+    sudo rm -rf {{installed}}
 
 # Follow kasaned's log
 logs:
