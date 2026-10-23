@@ -34,7 +34,8 @@ public struct Config: Equatable, Sendable {
         return try encoder.encode(self)
     }
 
-    private func validate() throws(ConfigError) {
+    /// Throws the first rule this config breaks. parse runs it on every config it reads.
+    public func validate() throws(ConfigError) {
         guard off.contains(where: { $0.device == .external }) else {
             throw .noExternalOffTrigger
         }
