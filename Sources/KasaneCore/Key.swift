@@ -32,7 +32,7 @@ extension Key {
     }
 }
 
-extension Key: Decodable {
+extension Key: Codable {
     public init(from decoder: any Decoder) throws {
         let name = try decoder.singleValueContainer().decode(String.self)
         guard let key = Key(rawValue: name) else {

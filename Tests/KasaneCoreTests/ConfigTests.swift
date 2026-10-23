@@ -77,3 +77,38 @@ private func configJSON(
         try Config.parse(configJSON(off: off))
     }
 }
+
+@Test(arguments: [1, 6])
+func rejectsATapCountOutsideTwoToFive(_ count: Int) {
+    #expect(throws: ConfigError.tapCountOutOfRange(count)) {
+        try Config.parse(configJSON(on: #"[{ "device": "builtIn", "gesture": "tap", "key": "fn", "count": \#(count), "withinMs": 400 }]"#))
+    }
+}
+
+@Test func rejectsTapsOnTheSameKeyWithDifferentCounts() {
+    // With fn x2 to turn ON and fn x3 to turn OFF, three taps would turn ON at the second tap.
+    let off = #"""
+        [
+          { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
+          { "device": "builtIn", "gesture": "tap", "key": "fn", "count": 3, "withinMs": 600 }
+        ]
+        """#
+    #expect(throws: ConfigError.conflictingTapCounts(.fn, .builtIn)) {
+        try Config.parse(configJSON(off: off))
+    }
+}
+
+@Test func encodingThenParsingGivesTheSameConfig() throws {
+    let config = try Config.parse(Data(exampleConfig.utf8))
+
+    #expect(try Config.parse(config.encoded()) == config)
+}
+
+@Test func pausedIsFalseWhenAbsentAndRoundTrips() throws {
+    var config = try Config.parse(configJSON())
+    #expect(!config.paused)
+
+    config.paused = true
+
+    #expect(try Config.parse(config.encoded()).paused)
+}
