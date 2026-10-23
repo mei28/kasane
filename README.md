@@ -26,8 +26,10 @@ Any keyboard that is not built in counts, including devices that only look like 
 YubiKey. With nothing else connected, ON would leave no keyboard that can type; locking the screen
 with the Touch ID button or closing the lid still turns it OFF.
 
-ON and OFF triggers (a double tap, or holding keys together) are set in a JSON file. OFF triggers
-can only be placed on the external keyboard. The Caps Lock LED on the built-in keyboard shows
+ON and OFF triggers (a double tap, or holding keys together) are set in a JSON file. At least one
+OFF trigger must be on the external keyboard, and the built-in keyboard takes no hold triggers,
+because the external keyboard's weight could hold a key down. The example config toggles with a
+double tap of fn on the built-in keyboard. The Caps Lock LED on the built-in keyboard shows
 the state; the setup assumes Caps Lock is remapped to Control.
 
 Developed on macOS 26 on an Apple silicon MacBook.
