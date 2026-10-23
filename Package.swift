@@ -8,7 +8,9 @@ let package = Package(
         // Config, trigger recognition, and the ON/OFF state machine. No IOKit, so it is testable.
         .target(name: "KasaneCore"),
         .testTarget(name: "KasaneCoreTests", dependencies: ["KasaneCore"]),
+        // The XPC protocol and signing checks shared by kasaned and the menu bar app.
+        .target(name: "KasaneIPC"),
         // The root daemon: IOKit glue around KasaneCore, checked on the hardware.
-        .executableTarget(name: "kasaned", dependencies: ["KasaneCore"]),
+        .executableTarget(name: "kasaned", dependencies: ["KasaneCore", "KasaneIPC"]),
     ]
 )

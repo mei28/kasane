@@ -17,6 +17,8 @@ final class KeyboardMonitor {
     private let manager: IOHIDManager
     private var builtIn: IOHIDDevice?
     private var externals: [IOHIDDevice] = []
+    /// External keyboards that could not be opened, usually because Input Monitoring is missing.
+    private var unopenedExternals: [IOHIDDevice] = []
 
     init(delegate: any KeyboardMonitorDelegate) {
         self.delegate = delegate
@@ -57,16 +59,31 @@ final class KeyboardMonitor {
             observeInput(of: device)
             delegate.builtInKeyboardAppeared(device)
         } else {
-            let result = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
-            guard result == kIOReturnSuccess else {
-                log("\(IOKitError(operation: "open external keyboard \(label)", code: result)); not counting it")
-                return
-            }
-            externals.append(device)
-            log("external keyboard connected: \(label)")
-            observeInput(of: device)
-            delegate.externalKeyboardCountChanged(externals.count)
+            openExternal(device, label: label)
         }
+    }
+
+    /// Tries again to open the external keyboards that could not be opened, for when Input
+    /// Monitoring has been granted since.
+    func retryUnopenedExternals() {
+        let pending = unopenedExternals
+        unopenedExternals = []
+        for device in pending {
+            openExternal(device, label: "retried")
+        }
+    }
+
+    private func openExternal(_ device: IOHIDDevice, label: String) {
+        let result = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
+        guard result == kIOReturnSuccess else {
+            log("\(IOKitError(operation: "open external keyboard \(label)", code: result)); not counting it yet")
+            unopenedExternals.append(device)
+            return
+        }
+        externals.append(device)
+        log("external keyboard connected: \(label)")
+        observeInput(of: device)
+        delegate.externalKeyboardCountChanged(externals.count)
     }
 
     private func removed(_ device: IOHIDDevice) {
@@ -77,6 +94,8 @@ final class KeyboardMonitor {
             externals.remove(at: index)
             log("external keyboard disconnected")
             delegate.externalKeyboardCountChanged(externals.count)
+        } else if let index = unopenedExternals.firstIndex(of: device) {
+            unopenedExternals.remove(at: index)
         }
     }
 

@@ -1,23 +1,24 @@
 import Foundation
-import KasaneCore
+import KasaneIPC
 
-guard CommandLine.arguments.count == 2 else {
-    log("usage: kasaned <config.json>")
+// launchd starts kasaned from Kasane.app with no arguments; the config lives in ConfigStore.
+guard CommandLine.arguments.count == 1 else {
+    log("usage: kasaned (takes no arguments)")
     exit(EX_USAGE)
 }
-let configPath = CommandLine.arguments[1]
-let config: Config
+
+let clientRequirement: String
 do {
-    config = try Config.parse(Data(contentsOf: URL(filePath: configPath)))
+    clientRequirement = try sameSignerRequirement()
 } catch {
-    // Not starting means never seizing, so a bad config leaves the built-in keyboard usable.
-    log("cannot use \(configPath): \(error)")
+    // Unsigned, kasaned cannot tell its app from any other process, so it does not run at all.
+    log("\(error); kasaned must be signed by `just app`")
     exit(EXIT_FAILURE)
 }
 
-let daemon = Daemon(config: config)
+let daemon = Daemon(store: ConfigStore(), watchdog: Watchdog())
 do {
-    try daemon.start()
+    try daemon.start(clientRequirement: clientRequirement)
 } catch {
     log("\(error)")
     exit(EXIT_FAILURE)

@@ -37,3 +37,13 @@ public enum RecordingOutcome: Codable, Equatable, Sendable {
     /// Another recording was already running.
     case busy
 }
+
+/// How kasaned answered a config the menu bar app asked it to apply.
+public enum ConfigApplyOutcome: Codable, Equatable, Sendable {
+    case applied
+    case rejected(ConfigError)
+    /// The data was not a config at all.
+    case unreadable(String)
+    /// The config is valid, but writing it failed; kasaned keeps the previous one.
+    case notSaved(String)
+}
