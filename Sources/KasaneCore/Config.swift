@@ -52,17 +52,18 @@ public struct Trigger: Equatable, Sendable {
 }
 
 public enum Gesture: Equatable, Sendable {
-    case doubleTap(Key, within: Duration)
+    /// `count` presses of one key, the last within `within` of the first.
+    case tap(Key, count: Int, within: Duration)
     case hold(Set<Key>, for: Duration)
 }
 
 extension Trigger: Decodable {
     private enum CodingKeys: String, CodingKey {
-        case device, gesture, key, withinMs, keys, forMs
+        case device, gesture, key, count, withinMs, keys, forMs
     }
 
     private enum GestureName: String, Decodable {
-        case doubleTap
+        case tap
         case hold
     }
 
@@ -70,9 +71,10 @@ extension Trigger: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         device = try container.decode(Device.self, forKey: .device)
         switch try container.decode(GestureName.self, forKey: .gesture) {
-        case .doubleTap:
-            gesture = .doubleTap(
+        case .tap:
+            gesture = .tap(
                 try container.decode(Key.self, forKey: .key),
+                count: try container.decode(Int.self, forKey: .count),
                 within: .milliseconds(try container.decode(Int.self, forKey: .withinMs)))
         case .hold:
             gesture = .hold(

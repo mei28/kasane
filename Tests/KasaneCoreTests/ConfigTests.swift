@@ -5,18 +5,18 @@ import Testing
 private let exampleConfig = """
     {
       "on": [
-        { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
+        { "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 400 }
       ],
       "off": [
         { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
-        { "device": "external", "gesture": "doubleTap", "key": "rightCommand", "withinMs": 400 }
+        { "device": "external", "gesture": "tap", "key": "rightCommand", "count": 2, "withinMs": 400 }
       ]
     }
     """
 
 /// A valid config with one part replaced, to test each validation rule on its own.
 private func configJSON(
-    on: String = #"[{ "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }]"#,
+    on: String = #"[{ "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 400 }]"#,
     off: String = #"[{ "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 }]"#
 ) -> Data {
     Data(#"{ "on": \#(on), "off": \#(off) }"#.utf8)
@@ -28,10 +28,10 @@ private func configJSON(
     #expect(
         config
             == Config(
-                on: [Trigger(device: .builtIn, gesture: .doubleTap(.fn, within: .milliseconds(400)))],
+                on: [Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))],
                 off: [
                     Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000))),
-                    Trigger(device: .external, gesture: .doubleTap(.rightCommand, within: .milliseconds(400))),
+                    Trigger(device: .external, gesture: .tap(.rightCommand, count: 2, within: .milliseconds(400))),
                 ]
             ))
 }
@@ -52,17 +52,17 @@ private func configJSON(
     let off = #"""
         [
           { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
-          { "device": "builtIn", "gesture": "doubleTap", "key": "fn", "withinMs": 400 }
+          { "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 400 }
         ]
         """#
     let config = try Config.parse(configJSON(off: off))
 
-    #expect(config.off.contains(Trigger(device: .builtIn, gesture: .doubleTap(.fn, within: .milliseconds(400)))))
+    #expect(config.off.contains(Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))))
 }
 
 @Test func rejectsAnUnknownKeyName() {
     #expect(throws: ConfigError.unknownKey("capsLok")) {
-        try Config.parse(configJSON(on: #"[{ "device": "builtIn", "gesture": "doubleTap", "key": "capsLok", "withinMs": 400 }]"#))
+        try Config.parse(configJSON(on: #"[{ "device": "builtIn", "gesture": "tap", "key": "capsLok", "count": 2, "withinMs": 400 }]"#))
     }
 }
 

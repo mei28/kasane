@@ -1,7 +1,7 @@
 import KasaneCore
 import Testing
 
-private let fnDoubleTap = Trigger(device: .builtIn, gesture: .doubleTap(.fn, within: .milliseconds(400)))
+private let fnDoubleTap = Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))
 private let shiftsHeld = Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000)))
 private let letterA = HIDUsage(page: 0x07, usage: 0x04)
 
@@ -154,4 +154,38 @@ private func firings(of trigger: Trigger, _ steps: [Step]) -> [Int] {
     ]
 
     #expect(firings(of: shiftsHeld, steps) == [8])
+}
+
+private let fnTripleTap = Trigger(device: .builtIn, gesture: .tap(.fn, count: 3, within: .milliseconds(600)))
+
+@Test func tripleTapFiresOnTheThirdReleaseWithinTheWindow() {
+    let steps = [
+        down(.fn, at: 0), up(.fn, at: 50),
+        down(.fn, at: 150), up(.fn, at: 200),
+        down(.fn, at: 300), up(.fn, at: 350),
+    ]
+
+    #expect(firings(of: fnTripleTap, steps) == [5])
+}
+
+@Test func tripleTapDoesNotFireWhenTheThirdDownIsPastTheWindow() {
+    let steps = [
+        down(.fn, at: 0), up(.fn, at: 50),
+        down(.fn, at: 150), up(.fn, at: 200),
+        down(.fn, at: 601), up(.fn, at: 650),
+    ]
+
+    #expect(firings(of: fnTripleTap, steps) == [])
+}
+
+@Test func tripleTapStartsOverFromADownPastTheWindow() {
+    let steps = [
+        down(.fn, at: 0), up(.fn, at: 50),
+        down(.fn, at: 150), up(.fn, at: 200),
+        down(.fn, at: 601), up(.fn, at: 650),
+        down(.fn, at: 700), up(.fn, at: 750),
+        down(.fn, at: 800), up(.fn, at: 850),
+    ]
+
+    #expect(firings(of: fnTripleTap, steps) == [9])
 }

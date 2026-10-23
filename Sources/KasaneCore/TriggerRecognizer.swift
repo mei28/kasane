@@ -6,8 +6,8 @@ public struct TriggerRecognizer: Sendable {
     public init(_ trigger: Trigger) {
         device = trigger.device
         switch trigger.gesture {
-        case .doubleTap(let key, let window):
-            gesture = DoubleTap(usage: key.usage, window: window)
+        case .tap(let key, let count, let window):
+            gesture = Tap(usage: key.usage, count: count, window: window)
         case .hold(let keys, let duration):
             gesture = Hold(usages: Set(keys.map(\.usage)), duration: duration)
         }
@@ -31,40 +31,49 @@ private protocol GestureRecognizer: Sendable {
     mutating func advance(to time: Duration) -> Bool
 }
 
-/// Down, up, down, up on one key, with the second down within `window` of the first.
-private struct DoubleTap: GestureRecognizer {
-    private enum Phase {
-        case idle
-        case firstDown(at: Duration)
-        case firstUp(firstDownAt: Duration)
-        case secondDown
-    }
-
+/// `count` presses and releases of one key, with the last press within `window` of the first.
+private struct Tap: GestureRecognizer {
     let usage: HIDUsage
+    let count: Int
     let window: Duration
-    private var phase = Phase.idle
+    private var firstDownAt: Duration?
+    private var presses = 0
+    private var isDown = false
 
-    init(usage: HIDUsage, window: Duration) {
+    init(usage: HIDUsage, count: Int, window: Duration) {
         self.usage = usage
+        self.count = count
         self.window = window
     }
 
     mutating func handle(_ event: KeyEvent) -> Bool {
         guard event.usage == usage else {
-            if event.isDown { phase = .idle }
+            if event.isDown { startOver() }
             return false
         }
-        switch (phase, event.isDown) {
-        case (.idle, true): phase = .firstDown(at: event.time)
-        case (.firstDown(let start), false): phase = .firstUp(firstDownAt: start)
-        case (.firstUp(let start), true):
-            phase = event.time - start <= window ? .secondDown : .firstDown(at: event.time)
-        case (.secondDown, false):
-            phase = .idle
-            return true
-        default: break
+        if event.isDown {
+            if let start = firstDownAt, event.time - start <= window {
+                presses += 1
+            } else {
+                // A press past the window starts a new attempt.
+                firstDownAt = event.time
+                presses = 1
+            }
+            isDown = true
+            return false
         }
-        return false
+        // A release without a press is one held before observation started.
+        guard isDown else { return false }
+        isDown = false
+        guard presses == count else { return false }
+        startOver()
+        return true
+    }
+
+    private mutating func startOver() {
+        firstDownAt = nil
+        presses = 0
+        isDown = false
     }
 
     func advance(to time: Duration) -> Bool {
