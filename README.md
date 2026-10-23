@@ -4,7 +4,7 @@ kasane blocks a MacBook's built-in keyboard while an external keyboard sits on t
 releases the block whenever the external keyboard might not be usable.
 
 Status: the core logic is tested, and the daemon works when run by hand as root with
-`just run`. Installation as a LaunchDaemon is not set up yet.
+`just run`. The LaunchDaemon install is written but not yet confirmed on the hardware.
 
 ## How it works
 
@@ -40,6 +40,19 @@ Developed on macOS 26 on an Apple silicon MacBook.
 just test                        # run the KasaneCore tests
 just run examples/config.json    # run kasaned as root against a config
 ```
+
+### Installing as a LaunchDaemon
+
+1. `just signing-identity` creates a self-signed code signing identity in the login keychain
+   (once per Mac). Signing with a stable identity keeps the Input Monitoring grant across
+   rebuilds.
+2. `just install` builds kasaned for release, signs it, installs it to `/usr/local/bin/kasaned`,
+   and restarts the daemon if it is loaded.
+3. Register the daemon. Mine is in my nix-darwin config as `dev.mei.kasaned`, with the config
+   file path as its only argument and `StandardErrorPath` set to `/var/log/kasaned.log`.
+4. Grant `/usr/local/bin/kasaned` Input Monitoring in System Settings, then restart the daemon.
+
+`just logs` follows the log.
 
 ## Documentation
 

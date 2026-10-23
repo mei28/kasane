@@ -157,9 +157,21 @@ LaunchDaemon は dotfiles の nix-darwin の設定から登録する。
 設定を書き換えられても変わるのはトリガだけで、安全のための解除は止められない。そのため、設定ファイルはユーザが書ける場所に置いてよいと判断した。
 
 kasaned には Input Monitoring の許可が要る見込みである（kanata は root で動かしても許可が要った）。
-この Mac にはコード署名用の証明書がない。
 アドホック署名では許可がバイナリのハッシュに結び付くので、ビルドし直すたびに許可を出し直すことになる。
-普段使いの前に、無料の Apple ID で作る Apple Development 証明書か、キーチェーンで作る自己署名の証明書を用意する。
+そこで、自己署名の証明書（`kasane code signing`）を `scripts/create-signing-identity.sh` で作り、ログインキーチェーンに入れた。
+証明書を信頼済みにしなくても `codesign` は署名でき、`codesign --verify` も通る。
+署名の designated requirement は `identifier "dev.mei.kasaned" and certificate leaf = H"..."` で、ビルドし直しても変わらない。
+
+配置は次のとおりにした。
+
+| もの | 場所 |
+|---|---|
+| バイナリ | `/usr/local/bin/kasaned`（`just install` でビルド、署名、配置する） |
+| 設定ファイル | `~/dotfiles/.config/kasane/config.json` |
+| LaunchDaemon | dotfiles の `.config/nix/nix-darwin/config/kasane.nix`。ラベルは `dev.mei.kasaned` |
+| ログ | `/var/log/kasaned.log`（`just logs` で追う） |
+
+kasane のリポジトリは `~/Documents` の下にある。`~/Documents` はプライバシー保護の対象なので、root の daemon からは読めない。そのため、設定ファイルは dotfiles に置く。
 
 ## 実機で確かめること
 
