@@ -179,28 +179,66 @@ kasaned は `IOConsoleUsers` を 0.2 秒ごとに読み、hold の判定も同�
 
 ## 導入と署名
 
-`just` のレシピでビルドして署名し、root が所有するパスにバイナリを置く。
-ユーザが書き換えられるパスのバイナリを root の daemon で動かすと、ユーザ権限で動く任意のプロセスがバイナリを差し替えて root 権限を得られるからである。
-LaunchDaemon は dotfiles の nix-darwin の設定から登録する。
-設定ファイルも dotfiles で管理する。
-設定を書き換えられても変わるのはトリガだけで、安全のための解除は止められない。そのため、設定ファイルはユーザが書ける場所に置いてよいと判断した。
+nix-darwin で入れる。
+kasane の flake が `darwinModules.default` を出し、dotfiles の nix-darwin がそれを読み込んで `services.kasane.enable = true` にする。
+`darwin-rebuild switch` の activation で、次のことが起きる。
 
-kasaned には Input Monitoring の許可が要る見込みである（kanata は root で動かしても許可が要った）。
+1. `scripts/install-app.sh` が、Nix でビルドした署名していない Kasane.app をコピーし、主ユーザーとして署名する
+2. 同じスクリプトが、署名したアプリを root の持ち物として `/Applications/Kasane.app` に置き、kasaned を再起動する
+3. nix-darwin が `bundle/dev.mei.kasaned.plist` を LaunchDaemon として読み込む
+
+install-app.sh は extraActivation で動かす。
+nix-darwin が LaunchDaemon を読み込む手順より前なので、初めて入れるときも、アプリを置いてから kasaned が起動する。
+
+root の daemon のバイナリは、ユーザが書き換えられない場所に置く。
+ユーザが書き換えられるパスのバイナリを root の daemon で動かすと、ユーザ権限で動く任意のプロセスがバイナリを差し替えて root 権限を得られるからである。
+設定ファイルは kasaned が `/Library/Application Support/Kasane/config.json` に持ち、メニューバーアプリは XPC 越しに読み書きする（「設定ファイル」の節）。
+
+### 署名
+
+kasaned には Input Monitoring の許可が要る。
 アドホック署名では許可がバイナリのハッシュに結び付くので、ビルドし直すたびに許可を出し直すことになる。
 そこで、自己署名の証明書（`kasane code signing`）を `scripts/create-signing-identity.sh` で作り、ログインキーチェーンに入れた。
+新しい Mac では、最初の switch の前に `nix run github:mei28/kasane#signing-identity` で作る。
 証明書を信頼済みにしなくても `codesign` は署名でき、`codesign --verify` も通る。
-署名の designated requirement は `identifier "dev.mei.kasaned" and certificate leaf = H"..."` で、ビルドし直しても変わらない。
+アプリと kasaned はどちらも識別子 `dev.mei.kasane` で署名する。
+designated requirement は `identifier "dev.mei.kasane" and certificate leaf = H"..."` で、ビルドし直しても変わらない。
+アプリと kasaned は、XPC で相手が同じ leaf 証明書で署名されていることも確かめる。
 
-配置は次のとおりにした。
+Nix のビルドは nixbld ユーザーで動き、ログインキーチェーンを使えない。
+そのためビルドでは署名せず、activation で署名する。
+activation は root が空の環境で動かすので、`launchctl asuser` と `sudo --user` で主ユーザーのセッションに入ってから `codesign` を呼ぶ。
+署名に失敗したら、入っているアプリには触らずに activation ごと止まる。
+
+### 入れ替えの判定
+
+`scripts/sign-app.sh` は、コピー元のストアパスを Info.plist の `KasaneSource` に書いてから署名する。
+install-app.sh は、入っているアプリの `KasaneSource` が同じなら何もしない。
+kasane を変えない switch で kasaned を再起動すると、載せた外付けの下で内蔵の止めが外れるからである。
+同じ理由で、パッケージのソースはアプリのビルドに使うもの（Package.swift、Sources、Tests、Info.plist、アイコン）に絞り、文書やスクリプトを変えてもストアパスが変わらないようにした。
+Tests を含めるのは、SwiftPM がテストのターゲットのディレクトリを、テストをビルドしないときにも求めるからである。
+
+`just install` は、手元のチェックアウトをビルドして同じスクリプトで入れる。
+次の switch で、dotfiles で固定した版に戻る。
+
+### ビルド
+
+Nix のビルドは、nixpkgs の Swift 6.2.4 と macOS 26.5 の SDK を使う。
+リンクするライブラリは Xcode でビルドしたものと同じで、どれも `/usr/lib` と `/System` にある。
+nixpkgs の swiftpm には macOS で swift-testing を動かす `swiftpm-testing-helper` がないので、テストは `just test` で Xcode の Swift を使って走らせる。
+
+文字列カタログの `xcstringstool` は Xcode にしかないので、`nix/strings.nix` が `bundle/Localizable.xcstrings` を `ja.lproj/Localizable.strings` に変換する。
+今のカタログが使う形（英語のキーごとに、訳し終えた日本語の stringUnit が 1 つ）だけを扱い、それ以外（複数形、未訳など）を見つけたら評価を止める。
+`just check-strings` で、xcstringstool の出力と同じになることを確かめる。
+
+### 配置
 
 | もの | 場所 |
 |---|---|
-| バイナリ | `/usr/local/bin/kasaned`（`just install` でビルド、署名、配置する） |
-| 設定ファイル | `~/dotfiles/.config/kasane/config.json` |
-| LaunchDaemon | ラベルは `dev.mei.kasaned`。まず `just daemon-load` で `launchd/dev.mei.kasaned.plist` から手で登録して動作を確かめ、そのあと dotfiles の nix-darwin の設定へ移す |
+| アプリと kasaned | `/Applications/Kasane.app`（Contents/MacOS に Kasane と kasaned。root の持ち物） |
+| 設定ファイル | `/Library/Application Support/Kasane/config.json` |
+| LaunchDaemon | `/Library/LaunchDaemons/dev.mei.kasaned.plist`（ラベルは `dev.mei.kasaned`。nix-darwin が管理する） |
 | ログ | `/var/log/kasaned.log`（`just logs` で追う） |
-
-kasane のリポジトリは `~/Documents` の下にある。`~/Documents` はプライバシー保護の対象なので、root の daemon からは読めない。そのため、設定ファイルは dotfiles に置く。
 
 ## 実機で確かめること
 
@@ -221,6 +259,9 @@ kasane のリポジトリは `~/Documents` の下にある。`~/Documents` は�
 | `/Library/LaunchDaemons` の plist で、アプリの中の daemon を動かせるか | `spike/smappservice/install-plist.sh` | 動いた。入力監視の許可が効き、launchd の下でも内蔵キーボードを占有して解放できた。作り直して上書きし、`launchctl kickstart -k` で再起動しても、登録し直さずに起動し、許可も残った |
 | アプリと daemon の XPC で、同じ証明書で署名した相手だけを通せるか | `spike/smappservice` | `identifier "…" and certificate leaf = H"…"` を daemon が自分の署名から作って要件にすると、自己署名のアプリは接続でき、アドホック署名のクライアントは拒否された |
 | 外付けを載せたとき fn と Caps Lock が隠れるか。打鍵中にどの内蔵キーが押されるか | 目視 | fn と Caps Lock は隠れない前提で進める（2026-10-23 に決めた。目視はしていない）。打鍵中にどの内蔵キーが押されるかは未確認 |
+| dotfiles の nixpkgs の Swift で、両方のプロダクトをビルドできるか | scratchpad の spike.nix | できた（2026-10-25）。Swift 6.2.4、SDK 26.5、minos 15.0。ツールチェーンはキャッシュから取れ、kasane のビルドは 1 分ほど。`otool -L` は Xcode のビルドと同じ。`/nix/store` を指す LC_RPATH が 1 つあるが、@rpath で読むライブラリはないので使われない。`swift test` は `swiftpm-testing-helper` がなく動かない |
+| activation と同じ空の環境から、主ユーザーとして署名し、Kasane を開き直せるか | `sudo /usr/bin/env -i /bin/bash spike-activation.sh` | できた（2026-10-25）。`launchctl asuser` を付けても付けなくても署名でき、leaf は前と同じだった。Nix でビルドした kasaned は入力監視の許可を引き継いだ。`env -i` のあとは PATH を export しないと、sudo の先でコマンドが見つからない |
+| `just install` で入れ、同じビルドなら何もしないか。~/Documents の sign-app.sh を asuser 経由で動かせるか | `just install` を 2 回 | できた（2026-10-26）。1 回目で入れ替わって kasaned と Kasane の PID が変わり、2 回目は「up to date」で何もしなかった。TCC には止められなかった |
 
 ## テストリスト
 
