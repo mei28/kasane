@@ -57,6 +57,12 @@ public struct GestureRecorder: Sendable {
             guard let key = Key(usage: press.usage) else { return .failure(.unsupportedKey(press.usage)) }
             keys.append(key)
         }
+        return tapOrHold(keys, on: first.device)
+    }
+
+    /// Presses of fn and modifier keys: repeated presses of one key, or keys held down together.
+    private func tapOrHold(_ keys: [Key], on device: Device) -> Result<Trigger, RecordingError> {
+        let first = presses[0]
         if overlaps || heldLong {
             // Held together from the last press to the first release, in steps of 100 ms.
             let lastDown = presses.map(\.down).max()!
@@ -64,7 +70,7 @@ public struct GestureRecorder: Sendable {
             guard lastDown < firstUp else { return .failure(.notHeldTogether) }
             let held = (firstUp - lastDown).wholeMilliseconds / 100 * 100
             guard held >= Self.holdThreshold.wholeMilliseconds else { return .failure(.holdTooShort) }
-            return .success(Trigger(device: first.device, gesture: .hold(Set(keys), for: .milliseconds(held))))
+            return .success(Trigger(device: device, gesture: .hold(Set(keys), for: .milliseconds(held))))
         }
         guard presses.count >= 2 else { return .failure(.singleTap) }
         guard presses.count <= 5 else { return .failure(.tooManyTaps(presses.count)) }
@@ -74,7 +80,7 @@ public struct GestureRecorder: Sendable {
         // Half again the measured span leaves room for a slower attempt, in steps of 50 ms.
         let window = (span * 3 / 2 + 49) / 50 * 50
         return .success(
-            Trigger(device: first.device, gesture: .tap(key, count: presses.count, within: .milliseconds(window))))
+            Trigger(device: device, gesture: .tap(key, count: presses.count, within: .milliseconds(window))))
     }
 
     /// A press this long is a hold, not a tap.
