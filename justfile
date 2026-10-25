@@ -1,4 +1,5 @@
 signing_identity := "kasane code signing"
+nix_result := ".build/nix-kasane"
 app := ".build/Kasane.app"
 installed := "/Applications/Kasane.app"
 daemon_label := "dev.mei.kasaned"
@@ -40,17 +41,11 @@ check-strings:
 signing-identity:
     scripts/create-signing-identity.sh "{{signing_identity}}"
 
-# Build Kasane.app with kasaned inside. Both are signed as dev.mei.kasane, so one Input Monitoring grant covers both.
+# Build Kasane.app with kasaned inside using Nix, and sign a copy. Both are signed as dev.mei.kasane, so one Input Monitoring grant covers both.
 app:
-    swift build -c release --product Kasane
-    swift build -c release --product kasaned
+    nix build --out-link {{nix_result}} .
     rm -rf {{app}}
-    mkdir -p {{app}}/Contents/MacOS {{app}}/Contents/Resources
-    cp bundle/Info.plist {{app}}/Contents/
-    cp .build/release/Kasane .build/release/kasaned {{app}}/Contents/MacOS/
-    cp bundle/AppIcon.icns {{app}}/Contents/Resources/
-    xcrun xcstringstool compile bundle/Localizable.xcstrings --output-directory {{app}}/Contents/Resources
-    scripts/sign-app.sh "{{signing_identity}}" {{app}}
+    scripts/sign-app.sh "{{signing_identity}}" {{nix_result}}/Applications/Kasane.app {{app}}
 
 # Redraw bundle/AppIcon.icns from scripts/app-icon.swift
 icon:

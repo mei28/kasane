@@ -12,8 +12,11 @@
       catalog = builtins.fromJSON (builtins.readFile ./bundle/Localizable.xcstrings);
     in
     {
-      # ja.lproj/Localizable.strings, compiled from bundle/Localizable.xcstrings.
-      packages.${system}.ja-strings = pkgs.writeText "Localizable.strings" (strings.toStrings catalog);
+      packages.${system} = rec {
+        default = pkgs.callPackage ./nix/package.nix { inherit ja-strings; };
+        # ja.lproj/Localizable.strings, compiled from bundle/Localizable.xcstrings.
+        ja-strings = pkgs.writeText "Localizable.strings" (strings.toStrings catalog);
+      };
 
       checks.${system}.strings = import ./nix/strings-test.nix { inherit pkgs strings; };
     };
