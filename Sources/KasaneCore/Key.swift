@@ -32,6 +32,28 @@ extension Key {
     }
 }
 
+/// A modifier in a keyboard shortcut. Either side's key counts, as in any macOS shortcut. The
+/// cases are in the order macOS writes them: ⌃⌥⇧⌘.
+public enum Modifier: String, CaseIterable, Sendable {
+    case control
+    case option
+    case shift
+    case command
+}
+
+extension Key {
+    /// The modifier this key stands for in a shortcut; nil for fn.
+    public var modifier: Modifier? {
+        switch self {
+        case .fn: nil
+        case .leftControl, .rightControl: .control
+        case .leftOption, .rightOption: .option
+        case .leftShift, .rightShift: .shift
+        case .leftCommand, .rightCommand: .command
+        }
+    }
+}
+
 extension Key: Codable {
     public init(from decoder: any Decoder) throws {
         let name = try decoder.singleValueContainer().decode(String.self)

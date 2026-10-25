@@ -23,3 +23,18 @@ import Testing
     #expect(Key(usage: HIDUsage(page: 0x07, usage: 0xE5)) == .rightShift)
     #expect(Key(usage: HIDUsage(page: 0x07, usage: 0x04)) == nil)
 }
+
+@Test func bothSidesOfAModifierKeyAreTheSameModifier() {
+    #expect(Key.leftControl.modifier == .control)
+    #expect(Key.rightControl.modifier == .control)
+    #expect(Key.leftOption.modifier == .option)
+    #expect(Key.rightOption.modifier == .option)
+    #expect(Key.leftShift.modifier == .shift)
+    #expect(Key.rightShift.modifier == .shift)
+    #expect(Key.leftCommand.modifier == .command)
+    #expect(Key.rightCommand.modifier == .command)
+}
+
+@Test func fnIsNotAModifier() {
+    #expect(Key.fn.modifier == nil)
+}
