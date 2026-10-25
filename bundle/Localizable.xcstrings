@@ -12,6 +12,16 @@
         }
       }
     },
+    "A shortcut also reaches the app in front, so pick one no app uses.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ショートカットは前面のアプリにも届きます。アプリが使っていない組み合わせを選んでください。"
+          }
+        }
+      }
+    },
     "A shortcut ends with one key, such as K in ⌃⌥⌘K.": {
       "localizations": {
         "ja": {
@@ -512,12 +522,42 @@
         }
       }
     },
+    "Restore": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "戻す"
+          }
+        }
+      }
+    },
     "Restore the Default Config": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "既定の設定に戻す"
+          }
+        }
+      }
+    },
+    "Restore the Default Config…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "既定の設定に戻す…"
+          }
+        }
+      }
+    },
+    "Restore the default config?": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "既定の設定に戻しますか？"
           }
         }
       }
@@ -658,6 +698,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "内蔵キーボードは使えます"
+          }
+        }
+      }
+    },
+    "The config file is from an older version or damaged.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定ファイルが古い形か、壊れています。"
+          }
+        }
+      }
+    },
+    "The keys you added are removed.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加したキーは消えます。"
           }
         }
       }

@@ -7,6 +7,7 @@ struct SettingsView: View {
     @ObservedObject var model: SettingsModel
     @ObservedObject var client: DaemonClient
     @ObservedObject var preferences: Preferences
+    @State private var confirmsRestore = false
 
     /// What makes the config worth reading again: kasaned coming back, or its file changing state.
     private struct ReloadKey: Equatable {
@@ -37,9 +38,20 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                 Button("Relaunch Kasane") { preferences.relaunch() }
             }
+
+            if model.config != nil {
+                Section {
+                    Button("Restore the Default Config…") { confirmsRestore = true }
+                }
+            }
         }
         .formStyle(.grouped)
-        .frame(width: 520, height: 520)
+        .frame(width: 520, height: 600)
+        .confirmationDialog("Restore the default config?", isPresented: $confirmsRestore) {
+            Button("Restore", role: .destructive) { Task { await model.restoreDefaultConfig() } }
+        } message: {
+            Text("The keys you added are removed.")
+        }
         .environment(\.locale, preferences.preferredLanguage.locale)
         .task(id: ReloadKey(reachable: client.status != nil, configError: client.status?.configError)) {
             await model.load()
@@ -60,7 +72,7 @@ struct SettingsView: View {
             }
             if let error = status.configError {
                 Section {
-                    Text("kasaned cannot use its config file")
+                    Text("The config file is from an older version or damaged.")
                     Text(error).font(.caption).foregroundStyle(.secondary)
                     Button("Restore the Default Config") { Task { await model.restoreDefaultConfig() } }
                 }
@@ -131,6 +143,7 @@ struct SettingsView: View {
                         "Unblocks the built-in keyboard from the external one, for when the keys above are out of reach. Only keys pressed on the external keyboard can be recorded."
                     )
                 }
+                Text("A shortcut also reaches the app in front, so pick one no app uses.")
             }
             .font(.caption)
             .foregroundStyle(.secondary)
