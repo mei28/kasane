@@ -39,10 +39,7 @@ icon:
 
 # Install Kasane.app root-owned in /Applications, (re)start kasaned, and open the app
 install: app
-    if pgrep -x Kasane >/dev/null; then pkill -x Kasane; fi
-    sudo rm -rf {{installed}}
-    sudo ditto {{app}} {{installed}}
-    sudo chown -R root:wheel {{installed}}
+    scripts/install-app.sh {{app}}
     sudo install -o root -g wheel -m 644 bundle/{{daemon_label}}.plist {{daemon_plist}}
     if sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl kickstart -k system/{{daemon_label}}; else sudo launchctl bootstrap system {{daemon_plist}}; fi
     open {{installed}}
