@@ -15,6 +15,27 @@ build:
 test:
     swift test
 
+# Run the Nix tests
+test-nix:
+    nix flake check
+
+# Compare the strings Nix compiles with what Xcode's xcstringstool makes from the same catalog
+check-strings:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    nix build --out-link .build/ja-strings .#ja-strings
+    rm -rf .build/xcstrings
+    xcrun xcstringstool compile bundle/Localizable.xcstrings --output-directory .build/xcstrings
+    made="$(cd .build/xcstrings && find . -type f)"
+    if [[ $made != ./ja.lproj/Localizable.strings ]]; then
+        echo "error: xcstringstool made more than ja.lproj/Localizable.strings:" >&2
+        echo "$made" >&2
+        exit 1
+    fi
+    plutil -lint .build/xcstrings/ja.lproj/Localizable.strings .build/ja-strings
+    # plutil sorts the keys, so only the content is compared.
+    diff <(plutil -convert xml1 -o - .build/xcstrings/ja.lproj/Localizable.strings) <(plutil -convert xml1 -o - .build/ja-strings)
+
 # Create the self-signed identity the app is signed with (once per Mac)
 signing-identity:
     scripts/create-signing-identity.sh "{{signing_identity}}"
