@@ -92,16 +92,6 @@
         }
       }
     },
-    "Hold %@": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ を押し続ける"
-          }
-        }
-      }
-    },
     "Hold all the keys down at the same time.": {
       "localizations": {
         "ja": {
@@ -392,16 +382,6 @@
         }
       }
     },
-    "Tap %@ %lld times": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ を %2$lld 回タップ"
-          }
-        }
-      }
-    },
     "Tap one key only.": {
       "localizations": {
         "ja": {
@@ -468,36 +448,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "メニューバーは、再起動すると切り替わります。"
-          }
-        }
-      }
-    },
-    "Toggles": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "切り替える"
-          }
-        }
-      }
-    },
-    "Turns off": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OFF にする"
-          }
-        }
-      }
-    },
-    "Turns on": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ON にする"
           }
         }
       }

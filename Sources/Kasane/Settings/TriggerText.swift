@@ -24,24 +24,6 @@ enum TriggerText {
         }
     }
 
-    /// The gesture alone, such as "Tap fn 2 times".
-    static func gesture(of trigger: Trigger) -> String {
-        switch trigger.gesture {
-        case .tap(let key, let count, _):
-            String(localized: "Tap \(name(of: key)) \(count) times")
-        case .hold(let keys, _):
-            String(localized: "Hold \(keys.sorted { $0.rawValue < $1.rawValue }.map(name(of:)).joined(separator: " + "))")
-        }
-    }
-
-    static func role(_ role: TriggerRole) -> String {
-        switch role {
-        case .toggle: String(localized: "Toggles")
-        case .on: String(localized: "Turns on")
-        case .off: String(localized: "Turns off")
-        }
-    }
-
     static func problem(_ error: ConfigError) -> String {
         switch error {
         case .noExternalOffTrigger:
