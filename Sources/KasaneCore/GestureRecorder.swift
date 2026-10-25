@@ -9,10 +9,14 @@ public enum RecordingError: Error, Codable, Equatable, Sendable {
     case holdTooShort
     case notHeldTogether
     case keyStillDown
+    /// More than one press of letters, digits, and the like: a shortcut ends with one key.
+    case severalKeys
+    case fnInShortcut
 }
 
-/// Turns the keys pressed while recording into a trigger: repeated presses of one key become a
-/// tap, keys held down become a hold.
+/// Turns the keys pressed while recording into a trigger: a letter, digit, or similar key pressed
+/// with modifiers becomes a shortcut; otherwise repeated presses of one key become a tap, and keys
+/// held down become a hold.
 public struct GestureRecorder: Sendable {
     private struct Press: Sendable {
         let usage: HIDUsage
@@ -52,12 +56,35 @@ public struct GestureRecorder: Sendable {
         guard let first = presses.first else { return .failure(.nothingRecorded) }
         guard presses.allSatisfy({ $0.device == first.device }) else { return .failure(.multipleDevices) }
         guard presses.allSatisfy({ $0.up != nil }) else { return .failure(.keyStillDown) }
-        var keys: [Key] = []
+        var keys: [(Press, Key)] = []
+        var shortcutKeys: [(Press, ShortcutKey)] = []
         for press in presses {
-            guard let key = Key(usage: press.usage) else { return .failure(.unsupportedKey(press.usage)) }
-            keys.append(key)
+            if let key = Key(usage: press.usage) {
+                keys.append((press, key))
+            } else if let key = ShortcutKey(usage: press.usage) {
+                shortcutKeys.append((press, key))
+            } else {
+                return .failure(.unsupportedKey(press.usage))
+            }
         }
-        return tapOrHold(keys, on: first.device)
+        guard !shortcutKeys.isEmpty else { return tapOrHold(keys.map(\.1), on: first.device) }
+        guard shortcutKeys.count == 1 else { return .failure(.severalKeys) }
+        return shortcut(shortcutKeys[0], modifiers: keys, on: first.device)
+    }
+
+    /// A shortcut key and the modifier keys pressed with it, such as ⌃⌥⌘K. Every modifier must
+    /// be down when the key goes down; whether the shortcut needs ⌃ or ⌘ is Config's rule.
+    private func shortcut(
+        _ key: (press: Press, key: ShortcutKey), modifiers: [(press: Press, key: Key)], on device: Device
+    ) -> Result<Trigger, RecordingError> {
+        var held: Set<Modifier> = []
+        for modifier in modifiers {
+            guard let name = modifier.key.modifier else { return .failure(.fnInShortcut) }
+            let heldAtKeyDown = modifier.press.down < key.press.down && modifier.press.up.map { $0 > key.press.down } ?? true
+            guard heldAtKeyDown else { return .failure(.notHeldTogether) }
+            held.insert(name)
+        }
+        return .success(Trigger(device: device, gesture: .shortcut(held, key.key)))
     }
 
     /// Presses of fn and modifier keys: repeated presses of one key, or keys held down together.

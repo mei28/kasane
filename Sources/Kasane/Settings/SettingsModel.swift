@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import KasaneCore
 
 /// The config as kasaned has it, and the recording in progress. Every change goes to kasaned at
@@ -54,7 +54,13 @@ final class SettingsModel: ObservableObject {
     /// Records a new trigger and adds it to `action`.
     func add(to action: Action) async {
         recordingAction = action
-        defer { recordingAction = nil }
+        // The keys are for kasaned to record. Without this, Return or Space would also press the
+        // window's buttons and Tab would move the focus.
+        let swallowKeys = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp, .flagsChanged]) { _ in nil }
+        defer {
+            recordingAction = nil
+            if let swallowKeys { NSEvent.removeMonitor(swallowKeys) }
+        }
         problems[action] = nil
         do {
             switch try await client.record() {

@@ -66,13 +66,13 @@ private func recorded(_ events: [KeyEvent]) -> GestureRecorder {
 }
 
 @Test func rejectsAKeyKasaneHasNoNameFor() {
-    let letterA = HIDUsage(page: 0x07, usage: 0x04)
+    let capsLock = HIDUsage(page: 0x07, usage: 0x39)
     let recorder = recorded([
-        event(letterA, true, at: 0, on: .builtIn), event(letterA, false, at: 50, on: .builtIn),
-        event(letterA, true, at: 150, on: .builtIn), event(letterA, false, at: 200, on: .builtIn),
+        event(capsLock, true, at: 0, on: .builtIn), event(capsLock, false, at: 50, on: .builtIn),
+        event(capsLock, true, at: 150, on: .builtIn), event(capsLock, false, at: 200, on: .builtIn),
     ])
 
-    #expect(recorder.result() == .failure(.unsupportedKey(letterA)))
+    #expect(recorder.result() == .failure(.unsupportedKey(capsLock)))
 }
 
 @Test func rejectsTapsOfTwoKeys() {
@@ -132,4 +132,91 @@ private func recorded(_ events: [KeyEvent]) -> GestureRecorder {
 
     #expect(!recorder.isFinished(at: .milliseconds(14_999)))
     #expect(recorder.isFinished(at: .seconds(15)))
+}
+
+// MARK: - Shortcuts
+
+/// One press and release of a shortcut key.
+private func press(_ key: ShortcutKey, _ downMs: Int, _ upMs: Int, on device: Device = .external) -> [KeyEvent] {
+    [event(key.usage, true, at: downMs, on: device), event(key.usage, false, at: upMs, on: device)]
+}
+
+private func down(_ key: Key, at ms: Int, on device: Device = .external) -> KeyEvent {
+    event(key.usage, true, at: ms, on: device)
+}
+
+private func up(_ key: Key, at ms: Int, on device: Device = .external) -> KeyEvent {
+    event(key.usage, false, at: ms, on: device)
+}
+
+@Test func aKeyPressedWithAModifierBecomesAShortcut() {
+    let recorder = recorded([down(.leftCommand, at: 0)] + press(.k, 50, 120) + [up(.leftCommand, at: 200)])
+
+    #expect(recorder.result() == .success(Trigger(device: .external, gesture: .shortcut([.command], .k))))
+}
+
+@Test func modifiersFromEitherSideJoinTheShortcut() {
+    let recorder = recorded(
+        [down(.rightOption, at: 0), down(.leftCommand, at: 10)] + press(.k, 50, 120)
+            + [up(.leftCommand, at: 150), up(.rightOption, at: 200)])
+
+    #expect(recorder.result() == .success(Trigger(device: .external, gesture: .shortcut([.option, .command], .k))))
+}
+
+@Test func aKeyAloneBecomesAShortcutWithoutModifiers() {
+    // Config.validate rejects it, so the rule that a shortcut needs ⌃ or ⌘ lives in one place.
+    let recorder = recorded(press(.k, 0, 80))
+
+    #expect(recorder.result() == .success(Trigger(device: .external, gesture: .shortcut([], .k))))
+}
+
+@Test func rejectsFnInAShortcut() {
+    let recorder = recorded([down(.fn, at: 0)] + press(.k, 50, 120) + [up(.fn, at: 200)])
+
+    #expect(recorder.result() == .failure(.fnInShortcut))
+}
+
+@Test func rejectsSeveralShortcutKeys() {
+    let twice = recorded([down(.leftCommand, at: 0)] + press(.k, 50, 120) + press(.k, 150, 220) + [up(.leftCommand, at: 300)])
+    let two = recorded([down(.leftCommand, at: 0)] + press(.k, 50, 120) + press(.j, 150, 220) + [up(.leftCommand, at: 300)])
+
+    #expect(twice.result() == .failure(.severalKeys))
+    #expect(two.result() == .failure(.severalKeys))
+}
+
+@Test func rejectsAModifierReleasedBeforeTheKey() {
+    let recorder = recorded(
+        [down(.leftShift, at: 0), up(.leftShift, at: 40), down(.leftCommand, at: 50)] + press(.k, 100, 150)
+            + [up(.leftCommand, at: 200)])
+
+    #expect(recorder.result() == .failure(.notHeldTogether))
+}
+
+@Test func rejectsAModifierPressedAfterTheKey() {
+    let recorder = recorded(
+        [down(.leftCommand, at: 0), event(ShortcutKey.k.usage, true, at: 50, on: .external), down(.leftShift, at: 80)]
+            + [event(ShortcutKey.k.usage, false, at: 120, on: .external), up(.leftShift, at: 150), up(.leftCommand, at: 200)])
+
+    #expect(recorder.result() == .failure(.notHeldTogether))
+}
+
+@Test func rejectsAShortcutWithAKeyKasaneHasNoNameFor() {
+    let capsLock = HIDUsage(page: 0x07, usage: 0x39)
+    let recorder = recorded(
+        [down(.leftCommand, at: 0), event(capsLock, true, at: 50, on: .external), event(capsLock, false, at: 120, on: .external),
+         up(.leftCommand, at: 200)])
+
+    #expect(recorder.result() == .failure(.unsupportedKey(capsLock)))
+}
+
+@Test func ignoresUsage1ReleasesInAShortcut() {
+    // The built-in keyboard sends a release of usage 0x01 after most keys.
+    let rollover = HIDUsage(page: 0x07, usage: 0x01)
+    let recorder = recorded([
+        down(.leftControl, at: 0, on: .builtIn), event(rollover, false, at: 1, on: .builtIn),
+        event(ShortcutKey.k.usage, true, at: 50, on: .builtIn), event(rollover, false, at: 51, on: .builtIn),
+        event(ShortcutKey.k.usage, false, at: 120, on: .builtIn), up(.leftControl, at: 200, on: .builtIn),
+    ])
+
+    #expect(recorder.result() == .success(Trigger(device: .builtIn, gesture: .shortcut([.control], .k))))
 }

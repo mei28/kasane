@@ -12,6 +12,16 @@
         }
       }
     },
+    "A shortcut ends with one key, such as K in ⌃⌥⌘K.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ショートカットの最後のキーは 1 つにしてください（⌃⌥⌘K の K）。"
+          }
+        }
+      }
+    },
     "A shortcut needs ⌃ or ⌘.": {
       "localizations": {
         "ja": {
@@ -362,16 +372,6 @@
         }
       }
     },
-    "Only fn and the modifier keys can be triggers.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "トリガにできるのは、fn と修飾キーだけです。"
-          }
-        }
-      }
-    },
     "Open Input Monitoring Settings…": {
       "localizations": {
         "ja": {
@@ -682,6 +682,16 @@
         }
       }
     },
+    "This key cannot be used. Use letters, digits, Space, Return, Tab, Escape, Delete, the arrow keys, fn, or the modifier keys.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このキーは使えません。使えるのは、文字、数字、スペース、Return、Tab、Escape、Delete、矢印、fn、修飾キーです。"
+          }
+        }
+      }
+    },
     "Turn on Kasane under Input Monitoring.": {
       "localizations": {
         "ja": {
@@ -778,6 +788,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "左右の Shift"
+          }
+        }
+      }
+    },
+    "fn cannot be part of a shortcut.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fn はショートカットに使えません。"
           }
         }
       }

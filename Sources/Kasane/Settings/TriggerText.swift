@@ -131,7 +131,13 @@ enum TriggerText {
         case .singleTap: String(localized: "One tap cannot be a trigger. Tap 2 to 5 times.")
         case .tooManyTaps(let count): String(localized: "That was \(count) taps. Tap 2 to 5 times.")
         case .multipleDevices: String(localized: "Keys came from both keyboards. Use one keyboard.")
-        case .unsupportedKey: String(localized: "Only fn and the modifier keys can be triggers.")
+        case .unsupportedKey:
+            String(
+                localized:
+                    "This key cannot be used. Use letters, digits, Space, Return, Tab, Escape, Delete, the arrow keys, fn, or the modifier keys."
+            )
+        case .severalKeys: String(localized: "A shortcut ends with one key, such as K in ⌃⌥⌘K.")
+        case .fnInShortcut: String(localized: "fn cannot be part of a shortcut.")
         case .tapsOnSeveralKeys: String(localized: "Tap one key only.")
         case .holdTooShort: String(localized: "Hold the keys for at least half a second.")
         case .notHeldTogether: String(localized: "Hold all the keys down at the same time.")
