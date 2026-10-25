@@ -93,7 +93,10 @@ final class Daemon {
 
     func setBlocked(_ blocked: Bool) -> Data {
         if blocked {
-            if recording == nil {
+            // Without a config there is no key to turn OFF again.
+            if config == nil {
+                log("block from the menu refused; no usable config")
+            } else if recording == nil {
                 if !blocker.isOn && !blocker.isPaused && !safety.permitsBlocking {
                     log("block from the menu refused; \(describe(safety))")
                 }

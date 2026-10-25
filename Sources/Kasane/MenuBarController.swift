@@ -55,7 +55,10 @@ final class MenuBarController: NSObject {
                 ? item(String(localized: "Unblock the Built-in Keyboard"), #selector(unblock))
                 : item(String(localized: "Block the Built-in Keyboard"), #selector(block))
             // kasaned refuses unsafe requests anyway; disabling says so before the click.
-            block.isEnabled = status.isOn || (!status.isPaused && !status.isRecording && status.safety.permitsBlocking)
+            block.isEnabled =
+                status.isOn
+                || (!status.isPaused && !status.isRecording && status.configError == nil
+                    && status.safety.permitsBlocking)
             menu.addItem(block)
             menu.addItem(
                 status.isPaused
