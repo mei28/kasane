@@ -21,6 +21,9 @@ public struct TriggerSet: Sendable {
         self.init(on: config.on, off: config.off)
     }
 
+    /// No triggers: what kasaned runs while it has no usable config.
+    public static let none = TriggerSet(on: [], off: [])
+
     private init(on onTriggers: [Trigger], off offTriggers: [Trigger]) {
         self.onTriggers = onTriggers
         self.offTriggers = offTriggers

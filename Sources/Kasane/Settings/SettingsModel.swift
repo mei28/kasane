@@ -31,7 +31,7 @@ final class SettingsModel: ObservableObject {
 
     func load() async {
         do {
-            entries = try await client.config().entries
+            entries = try await client.config()?.entries ?? []
             savedEntries = entries
             message = nil
         } catch {

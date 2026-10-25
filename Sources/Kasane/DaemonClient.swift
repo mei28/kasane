@@ -46,10 +46,9 @@ final class DaemonClient: ObservableObject {
         Task { await update { try await self.call(Status.self) { $0.setPaused(paused, reply: $1) } } }
     }
 
-    /// The config in use. Decoded without validation: when kasaned's own file is broken, it
-    /// reports an empty config and the settings window has to be able to show it.
-    func config() async throws -> Config {
-        try await call(Config.self) { $0.config(reply: $1) }
+    /// The config in use, or nil while kasaned's config file is unusable.
+    func config() async throws -> Config? {
+        try await call(Config?.self) { $0.config(reply: $1) }
     }
 
     func apply(_ config: Config) async throws -> ConfigApplyOutcome {

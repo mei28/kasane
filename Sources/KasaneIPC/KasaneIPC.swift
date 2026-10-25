@@ -21,7 +21,7 @@ public let signingIdentifier = "dev.mei.kasane"
     func setBlocked(_ blocked: Bool, reply: @escaping @Sendable (Data) -> Void)
     /// Pauses or resumes kasane, then replies with the `Status`.
     func setPaused(_ paused: Bool, reply: @escaping @Sendable (Data) -> Void)
-    /// Replies with the `Config` in use.
+    /// Replies with the `Config` in use, or JSON null while the config file is unusable.
     func config(reply: @escaping @Sendable (Data) -> Void)
     /// Validates, saves, and uses a `Config`, then replies with a `ConfigApplyOutcome`.
     func applyConfig(_ config: Data, reply: @escaping @Sendable (Data) -> Void)

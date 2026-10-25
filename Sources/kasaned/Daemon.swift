@@ -23,7 +23,8 @@ final class Daemon {
     private let registryRoot: io_registry_entry_t
     private let store: ConfigStore
     private let watchdog: Watchdog
-    private var config: Config
+    /// nil while the config file is unusable; kasaned then runs without triggers.
+    private var config: Config?
     private var configError: String?
     private var safety: Safety
     private var blocker: Blocker
@@ -43,21 +44,24 @@ final class Daemon {
         self.store = store
         self.watchdog = watchdog
         registryRoot = IORegistryGetRootEntry(kIOMainPortDefault)
-        do {
-            config = try store.load()
-        } catch {
-            // Without a usable config there are no triggers, so kasaned never blocks; the app
-            // shows the error and can save a new config.
-            config = Config(on: [], off: [])
-            configError = "\(error)"
-            log("cannot use \(store.url.path): \(error)")
-        }
         let console = readConsoleState(registryRoot)
         safety = Safety(
             externalKeyboardConnected: false, screenLocked: console.screenLocked, onConsole: console.onConsole,
             asleep: false)
-        blocker = Blocker(safety: safety, paused: config.paused)
-        triggers = TriggerSet(config)
+        do {
+            let config = try store.load()
+            self.config = config
+            blocker = Blocker(safety: safety, paused: config.paused)
+            triggers = TriggerSet(config)
+        } catch {
+            // Without a usable config there are no triggers, so kasaned never blocks; the app
+            // shows the error and can save a new config.
+            config = nil
+            configError = "\(error)"
+            log("cannot use \(store.url.path): \(error)")
+            blocker = Blocker(safety: safety, paused: false)
+            triggers = .none
+        }
     }
 
     func start(clientRequirement: String) throws(IOKitError) {
@@ -109,8 +113,9 @@ final class Daemon {
         }
         log(paused ? "paused" : "resumed")
         // A broken config file stays as it is until the app saves a new one.
-        if configError == nil {
+        if var config {
             config.paused = paused
+            self.config = config
             do {
                 try store.save(config)
             } catch {
@@ -121,12 +126,9 @@ final class Daemon {
         return statusData()
     }
 
+    /// The config in use, or JSON null while the config file is unusable.
     func configData() -> Data {
-        do {
-            return try config.encoded()
-        } catch {
-            preconditionFailure("encoding a validated config failed: \(error)")
-        }
+        encode(config)
     }
 
     func applyConfig(_ data: Data) -> Data {
@@ -147,7 +149,7 @@ final class Daemon {
         }
         config = newConfig
         configError = nil
-        triggers = TriggerSet(config)
+        triggers = TriggerSet(newConfig)
         log("applied a new config")
         publish()
         return encode(ConfigApplyOutcome.applied)

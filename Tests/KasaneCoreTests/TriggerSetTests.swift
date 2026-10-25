@@ -37,3 +37,13 @@ private func event(_ key: Key, _ isDown: Bool, at ms: Int, on device: Device = .
 
     #expect(triggers.handle(event(.fn, false, at: 200)) == Fired(on: false, off: false))
 }
+
+@Test func noneNeverFires() {
+    var triggers = TriggerSet.none
+    _ = triggers.handle(event(.fn, true, at: 0))
+    _ = triggers.handle(event(.fn, false, at: 50))
+    _ = triggers.handle(event(.fn, true, at: 150))
+
+    #expect(triggers.handle(event(.fn, false, at: 200)) == Fired(on: false, off: false))
+    #expect(triggers.advance(to: .milliseconds(2000)) == Fired(on: false, off: false))
+}
