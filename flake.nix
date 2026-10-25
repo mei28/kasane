@@ -21,6 +21,15 @@
         ja-strings = pkgs.writeText "Localizable.strings" (strings.toStrings catalog);
       };
 
+      # `nix run github:mei28/kasane#signing-identity`, once per Mac before the first switch.
+      apps.${system}.signing-identity = {
+        type = "app";
+        program = "${pkgs.writeShellScript "kasane-signing-identity" ''
+          exec ${./scripts/create-signing-identity.sh} ${pkgs.lib.escapeShellArg signingIdentity}
+        ''}";
+        meta.description = "Create the code signing identity kasane is signed with in the login keychain";
+      };
+
       checks.${system}.strings = import ./nix/strings-test.nix { inherit pkgs strings; };
 
       darwinModules.default = import ./nix/darwin-module.nix { inherit self signingIdentity; };
