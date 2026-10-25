@@ -83,7 +83,7 @@ final class MenuBarController: NSObject {
     @objc private func openInputMonitoring() { MenuText.openInputMonitoringSettings() }
 
     @objc private func openSettings() {
-        let settings = settings ?? SettingsWindowController(preferences: preferences)
+        let settings = settings ?? SettingsWindowController(client: client, preferences: preferences)
         self.settings = settings
         settings.show()
     }

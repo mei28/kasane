@@ -32,12 +32,22 @@
         }
       }
     },
-    "Add at least one trigger on the external keyboard that turns Kasane off.": {
+    "Another recording is in progress.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "外付けキーボードで OFF にするトリガを、少なくとも 1 つ置いてください。"
+            "value": "ほかの記録が進んでいます。"
+          }
+        }
+      }
+    },
+    "Block and Unblock": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "止める・戻す"
           }
         }
       }
@@ -52,6 +62,16 @@
         }
       }
     },
+    "Blocks the built-in keyboard, and unblocks it when pressed again. Blocking works only while an external keyboard is connected.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵キーボードを止めます。止めているときに押すと戻します。外付けキーボードがつながっている間だけ止められます。"
+          }
+        }
+      }
+    },
     "Built-in keyboard": {
       "localizations": {
         "ja": {
@@ -62,12 +82,42 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャンセル"
+          }
+        }
+      }
+    },
     "Cannot reach kasaned": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "kasaned につながりません"
+          }
+        }
+      }
+    },
+    "Cannot read the config from kasaned: %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned から設定を読めません：%@"
+          }
+        }
+      }
+    },
+    "Customize…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カスタマイズ…"
           }
         }
       }
@@ -88,6 +138,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "一般"
+          }
+        }
+      }
+    },
+    "Hold %@ for %@ s": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ を %2$@ 秒長押し"
+          }
+        }
+      }
+    },
+    "Hold %@ for %@ s on the built-in keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵の %1$@ を %2$@ 秒長押し"
+          }
+        }
+      }
+    },
+    "Hold %@ for %@ s on the external keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けの %1$@ を %2$@ 秒長押し"
           }
         }
       }
@@ -148,6 +228,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kasane は一時停止中です"
+          }
+        }
+      }
+    },
+    "Keys": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キー"
           }
         }
       }
@@ -282,6 +372,56 @@
         }
       }
     },
+    "Press %@ %lld times": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ を %2$lld 回押す"
+          }
+        }
+      }
+    },
+    "Press %@ %lld times on the built-in keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵の %1$@ を %2$lld 回押す"
+          }
+        }
+      }
+    },
+    "Press %@ %lld times on the external keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けの %1$@ を %2$lld 回押す"
+          }
+        }
+      }
+    },
+    "Press the keys on the external keyboard.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けキーボードでキーを押してください。"
+          }
+        }
+      }
+    },
+    "Press the new keys. Recording ends one second after you let go.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいキーを押してください。手を離して 1 秒たつと、記録が終わります。"
+          }
+        }
+      }
+    },
     "Quit Kasane": {
       "localizations": {
         "ja": {
@@ -308,6 +448,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kasane を再起動"
+          }
+        }
+      }
+    },
+    "Restore the Default Config": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "既定の設定に戻す"
           }
         }
       }
@@ -452,12 +602,42 @@
         }
       }
     },
+    "Turn on Kasane under Input Monitoring.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力監視で Kasane をオンにしてください。"
+          }
+        }
+      }
+    },
+    "Unblock from the External Keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けで戻す"
+          }
+        }
+      }
+    },
     "Unblock the Built-in Keyboard": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "内蔵キーボードを戻す"
+          }
+        }
+      }
+    },
+    "Unblocks the built-in keyboard from the external one, for when the keys above are out of reach. Only keys pressed on the external keyboard can be recorded.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "止めるキーに手が届かないときに、外付けキーボードから内蔵キーボードを戻します。外付けキーボードで押したキーだけを記録できます。"
           }
         }
       }
@@ -482,12 +662,62 @@
         }
       }
     },
+    "both Command keys": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左右の Command"
+          }
+        }
+      }
+    },
+    "both Control keys": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左右の Control"
+          }
+        }
+      }
+    },
+    "both Option keys": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左右の Option"
+          }
+        }
+      }
+    },
+    "both Shift keys": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左右の Shift"
+          }
+        }
+      }
+    },
     "kasaned cannot use its config file": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "kasaned が設定ファイルを使えません"
+          }
+        }
+      }
+    },
+    "kasaned is not running. Install it with just install.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kasaned が動いていません。just install でインストールしてください。"
           }
         }
       }

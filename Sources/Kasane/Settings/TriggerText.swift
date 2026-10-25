@@ -17,6 +17,50 @@ enum TriggerText {
         }
     }
 
+    /// How a pop-up names a trigger, such as "Press fn 2 times on the built-in keyboard". The
+    /// external OFF trigger is always on the external keyboard, so it leaves the keyboard out.
+    static func describe(_ trigger: Trigger, namingKeyboard: Bool) -> String {
+        switch (trigger.gesture, namingKeyboard ? trigger.device : nil) {
+        case (.tap(let key, let count, _), nil):
+            String(localized: "Press \(name(of: key)) \(count) times")
+        case (.tap(let key, let count, _), .builtIn):
+            String(localized: "Press \(name(of: key)) \(count) times on the built-in keyboard")
+        case (.tap(let key, let count, _), .external):
+            String(localized: "Press \(name(of: key)) \(count) times on the external keyboard")
+        case (.hold(let held, let duration), nil):
+            String(localized: "Hold \(keys(held)) for \(seconds(duration)) s")
+        case (.hold(let held, let duration), .builtIn):
+            String(localized: "Hold \(keys(held)) for \(seconds(duration)) s on the built-in keyboard")
+        case (.hold(let held, let duration), .external):
+            String(localized: "Hold \(keys(held)) for \(seconds(duration)) s on the external keyboard")
+        }
+    }
+
+    /// Keys held together, as "both Shift keys" when a modifier is held on both sides.
+    private static func keys(_ keys: Set<Key>) -> String {
+        let groups: [(keys: [Key], both: String?)] = [
+            ([.fn], nil),
+            ([.leftControl, .rightControl], String(localized: "both Control keys")),
+            ([.leftOption, .rightOption], String(localized: "both Option keys")),
+            ([.leftShift, .rightShift], String(localized: "both Shift keys")),
+            ([.leftCommand, .rightCommand], String(localized: "both Command keys")),
+        ]
+        var names: [String] = []
+        for group in groups {
+            if let both = group.both, group.keys.allSatisfy(keys.contains) {
+                names.append(both)
+            } else {
+                names += group.keys.filter(keys.contains).map(name(of:))
+            }
+        }
+        return names.joined(separator: " + ")
+    }
+
+    /// Whole seconds, or tenths when the duration has them: "1", "1.5".
+    private static func seconds(_ duration: Duration) -> String {
+        (duration / .seconds(1)).formatted(.number.precision(.fractionLength(0...1)))
+    }
+
     static func name(of device: Device) -> String {
         switch device {
         case .builtIn: String(localized: "Built-in keyboard")
