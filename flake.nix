@@ -10,6 +10,9 @@
       pkgs = nixpkgs.legacyPackages.${system};
       strings = import ./nix/strings.nix { inherit (nixpkgs) lib; };
       catalog = builtins.fromJSON (builtins.readFile ./bundle/Localizable.xcstrings);
+      # The self-signed code signing identity in the login keychain. Input Monitoring and the XPC
+      # peer checks rely on every build being signed with it.
+      signingIdentity = "kasane code signing";
     in
     {
       packages.${system} = rec {
@@ -19,5 +22,7 @@
       };
 
       checks.${system}.strings = import ./nix/strings-test.nix { inherit pkgs strings; };
+
+      darwinModules.default = import ./nix/darwin-module.nix { inherit self signingIdentity; };
     };
 }

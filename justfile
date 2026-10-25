@@ -2,8 +2,8 @@ signing_identity := "kasane code signing"
 nix_result := ".build/nix-kasane"
 app := ".build/Kasane.app"
 installed := "/Applications/Kasane.app"
-daemon_label := "dev.mei.kasaned"
-daemon_plist := "/Library/LaunchDaemons/dev.mei.kasaned.plist"
+# Present while nix-darwin's kasane module (services.kasane.enable) is on.
+managed_plist := "/run/current-system/Library/LaunchDaemons/dev.mei.kasaned.plist"
 
 default:
     @just --list
@@ -53,18 +53,16 @@ icon:
     swift scripts/app-icon.swift .build/AppIcon.iconset
     iconutil --convert icns --output bundle/AppIcon.icns .build/AppIcon.iconset
 
-# Install Kasane.app built from this checkout root-owned in /Applications and (re)start kasaned
+# Install Kasane.app built from this checkout over the one nix-darwin installed, and restart kasaned. The next darwin-rebuild switch puts the dotfiles' version back.
 install:
+    if ! test -e {{managed_plist}}; then echo "error: turn on services.kasane in nix-darwin and switch first" >&2; exit 1; fi
     nix build --out-link {{nix_result}} .
     sudo scripts/install-app.sh "{{signing_identity}}" "$(realpath {{nix_result}})/Applications/Kasane.app" "$(id -un)"
-    sudo install -o root -g wheel -m 644 bundle/{{daemon_label}}.plist {{daemon_plist}}
-    if ! sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl bootstrap system {{daemon_plist}}; fi
 
-# Stop kasaned and remove Kasane.app and the LaunchDaemon (the config in /Library/Application Support/Kasane stays)
+# Quit Kasane and remove it after services.kasane is turned off in nix-darwin, which removes kasaned (the config in /Library/Application Support/Kasane stays)
 uninstall:
+    if test -e {{managed_plist}}; then echo "error: turn off services.kasane in nix-darwin and switch first" >&2; exit 1; fi
     if pgrep -x Kasane >/dev/null; then pkill -x Kasane; fi
-    if sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl bootout system/{{daemon_label}}; fi
-    sudo rm -f {{daemon_plist}}
     sudo rm -rf {{installed}}
 
 # Follow kasaned's log
