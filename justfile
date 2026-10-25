@@ -53,12 +53,12 @@ icon:
     swift scripts/app-icon.swift .build/AppIcon.iconset
     iconutil --convert icns --output bundle/AppIcon.icns .build/AppIcon.iconset
 
-# Install Kasane.app root-owned in /Applications, (re)start kasaned, and open the app
-install: app
-    scripts/install-app.sh {{app}}
+# Install Kasane.app built from this checkout root-owned in /Applications and (re)start kasaned
+install:
+    nix build --out-link {{nix_result}} .
+    sudo scripts/install-app.sh "{{signing_identity}}" "$(realpath {{nix_result}})/Applications/Kasane.app" "$(id -un)"
     sudo install -o root -g wheel -m 644 bundle/{{daemon_label}}.plist {{daemon_plist}}
-    if sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl kickstart -k system/{{daemon_label}}; else sudo launchctl bootstrap system {{daemon_plist}}; fi
-    open {{installed}}
+    if ! sudo launchctl print system/{{daemon_label}} >/dev/null 2>&1; then sudo launchctl bootstrap system {{daemon_plist}}; fi
 
 # Stop kasaned and remove Kasane.app and the LaunchDaemon (the config in /Library/Application Support/Kasane stays)
 uninstall:
