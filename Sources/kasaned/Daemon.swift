@@ -223,6 +223,7 @@ final class Daemon {
     }
 
     private func retryUnopenedKeyboards() {
+        keyboards?.refreshRemappings()
         keyboards?.retryUnopenedExternals()
         if let unopenedBuiltIn {
             openBuiltIn(unopenedBuiltIn)

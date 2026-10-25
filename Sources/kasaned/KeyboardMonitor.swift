@@ -19,6 +19,9 @@ final class KeyboardMonitor {
     private var externals: [IOHIDDevice] = []
     /// External keyboards that could not be opened, usually because Input Monitoring is missing.
     private var unopenedExternals: [IOHIDDevice] = []
+    private let remappingReader = KeyRemappingReader()
+    /// The keyboards macOS substitutes keys for, such as Caps Lock to Control.
+    private var remappings: [IOHIDDevice: KeyRemapping] = [:]
 
     init(delegate: any KeyboardMonitorDelegate) {
         self.delegate = delegate
@@ -61,6 +64,17 @@ final class KeyboardMonitor {
         } else {
             openExternal(device, label: label)
         }
+        refreshRemappings()
+    }
+
+    /// Reads again which keys macOS substitutes on each keyboard. The substitutions are set at
+    /// login, after kasaned starts, and whenever the user changes them, so kasaned reads them
+    /// again from time to time.
+    func refreshRemappings() {
+        let current = remappingReader.remappings(for: [builtIn].compactMap { $0 } + externals)
+        guard current != remappings else { return }
+        remappings = current
+        log("macOS substitutes keys on \(current.count) of \(externals.count + (builtIn == nil ? 0 : 1)) keyboards")
     }
 
     /// Tries again to open the external keyboards that could not be opened, for when Input
@@ -87,6 +101,7 @@ final class KeyboardMonitor {
     }
 
     private func removed(_ device: IOHIDDevice) {
+        remappings[device] = nil
         if device == builtIn {
             builtIn = nil
             delegate.builtInKeyboardDisappeared()
@@ -116,10 +131,14 @@ final class KeyboardMonitor {
         // Array slots report usage 0xFFFFFFFF. Keys live on the keyboard page and, for fn, on
         // Apple's vendor pages.
         guard usage != 0xFFFF_FFFF, page == kHIDPage_KeyboardOrKeypad || page >= 0xFF else { return }
-        let device: Device = IOHIDElementGetDevice(element) == builtIn ? .builtIn : .external
+        let hidDevice = IOHIDElementGetDevice(element)
+        let device: Device = hidDevice == builtIn ? .builtIn : .external
+        let pressed = HIDUsage(page: page, usage: usage)
+        // The key the user typed, after the substitutions macOS makes for this keyboard.
+        let typed = remappings[hidDevice]?.apply(pressed) ?? pressed
         delegate.keyEvent(
             KeyEvent(
-                device: device, usage: HIDUsage(page: page, usage: usage),
+                device: device, usage: typed,
                 isDown: IOHIDValueGetIntegerValue(value) != 0, time: uptime()))
     }
 }
