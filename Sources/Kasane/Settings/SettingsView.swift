@@ -1,8 +1,8 @@
 import KasaneCore
 import SwiftUI
 
-/// One row per action, each with a pop-up like the Dictation shortcut in System Settings: the
-/// preset, the current custom trigger, and "Customize…" to record a new one.
+/// One section per action, listing its triggers like the shortcut bindings in Wispr Flow: each row
+/// can be removed, and "Add…" records a new one. Every change applies at once.
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
     @ObservedObject var client: DaemonClient
@@ -18,8 +18,8 @@ struct SettingsView: View {
         Form {
             problems
             if let config = model.config {
-                slot(.toggle, in: config)
-                slot(.externalOff, in: config)
+                section(.toggle, in: config)
+                section(.externalOff, in: config)
             }
 
             Section("General") {
@@ -80,9 +80,27 @@ struct SettingsView: View {
         }
     }
 
-    private func slot(_ slot: SettingsModel.Slot, in config: Config) -> some View {
+    private func section(_ action: SettingsModel.Action, in config: Config) -> some View {
         Section {
-            if model.recordingSlot == slot {
+            let triggers = config[keyPath: action.keyPath]
+            if triggers.isEmpty {
+                Text("None").foregroundStyle(.secondary)
+            }
+            ForEach(triggers, id: \.self) { trigger in
+                HStack {
+                    Text(TriggerText.describe(trigger, namingKeyboard: action == .toggle))
+                    Spacer()
+                    Button {
+                        Task { await model.remove(trigger, from: action) }
+                    } label: {
+                        Image(systemName: "minus.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .help(Text("Remove"))
+                    .disabled(model.recordingAction != nil || !model.canRemove(from: action, in: config))
+                }
+            }
+            if model.recordingAction == action {
                 HStack {
                     ProgressView().controlSize(.small)
                     Text("Press the new keys. Recording ends one second after you let go.")
@@ -90,29 +108,20 @@ struct SettingsView: View {
                     Button("Cancel") { model.cancelRecording() }
                 }
             } else {
-                Picker("Keys", selection: choice(for: slot, in: config)) {
-                    Text(TriggerText.describe(slot.preset, namingKeyboard: slot == .toggle))
-                        .tag(SettingsModel.Choice.preset)
-                    if config[keyPath: slot.keyPath] != slot.preset {
-                        Text(TriggerText.describe(config[keyPath: slot.keyPath], namingKeyboard: slot == .toggle))
-                            .tag(SettingsModel.Choice.custom)
-                    }
-                    Divider()
-                    Text("Customize…").tag(SettingsModel.Choice.customize)
-                }
-                .disabled(model.recordingSlot != nil)
+                Button("Add…") { Task { await model.add(to: action) } }
+                    .disabled(model.recordingAction != nil)
             }
         } header: {
-            switch slot {
+            switch action {
             case .toggle: Text("Block and Unblock")
             case .externalOff: Text("Unblock from the External Keyboard")
             }
         } footer: {
             VStack(alignment: .leading, spacing: 4) {
-                if let problem = model.problems[slot] {
+                if let problem = model.problems[action] {
                     Text(problem).foregroundStyle(.red)
                 }
-                switch slot {
+                switch action {
                 case .toggle:
                     Text(
                         "Blocks the built-in keyboard, and unblocks it when pressed again. Blocking works only while an external keyboard is connected."
@@ -126,11 +135,5 @@ struct SettingsView: View {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
-    }
-
-    private func choice(for slot: SettingsModel.Slot, in config: Config) -> Binding<SettingsModel.Choice> {
-        Binding(
-            get: { model.choice(for: slot, in: config) },
-            set: { model.choose($0, for: slot) })
     }
 }

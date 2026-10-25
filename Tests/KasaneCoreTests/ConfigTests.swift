@@ -7,8 +7,9 @@ private let shiftsHeld = #"{ "device": "external", "gesture": "hold", "keys": ["
 
 /// A valid config with one part replaced, to test each validation rule on its own. A nil
 /// `paused` leaves the field out.
-private func configJSON(toggle: String = fnTwice, externalOff: String = shiftsHeld, paused: Bool? = false) -> Data {
-    var fields = [#""toggle": \#(toggle)"#, #""externalOff": \#(externalOff)"#]
+private func configJSON(toggle: [String] = [fnTwice], externalOff: [String] = [shiftsHeld], paused: Bool? = false) -> Data {
+    func list(_ triggers: [String]) -> String { "[\(triggers.joined(separator: ", "))]" }
+    var fields = [#""toggle": \#(list(toggle))"#, #""externalOff": \#(list(externalOff))"#]
     if let paused { fields.append(#""paused": \#(paused)"#) }
     return Data("{ \(fields.joined(separator: ", ")) }".utf8)
 }
@@ -26,17 +27,17 @@ private func configJSON(toggle: String = fnTwice, externalOff: String = shiftsHe
     }
 }
 
-@Test func parsesTheToggleAndTheExternalOffTrigger() throws {
+@Test func parsesOneTriggerPerAction() throws {
     let config = try Config.parse(
         configJSON(
-            toggle: #"{ "device": "builtIn", "gesture": "tap", "key": "fn", "count": 3, "withinMs": 600 }"#,
-            externalOff: #"{ "device": "external", "gesture": "tap", "key": "rightCommand", "count": 2, "withinMs": 400 }"#))
+            toggle: [#"{ "device": "builtIn", "gesture": "tap", "key": "fn", "count": 3, "withinMs": 600 }"#],
+            externalOff: [#"{ "device": "external", "gesture": "tap", "key": "rightCommand", "count": 2, "withinMs": 400 }"#]))
 
     #expect(
         config
             == Config(
-                toggle: Trigger(device: .builtIn, gesture: .tap(.fn, count: 3, within: .milliseconds(600))),
-                externalOff: Trigger(device: .external, gesture: .tap(.rightCommand, count: 2, within: .milliseconds(400)))))
+                toggle: [Trigger(device: .builtIn, gesture: .tap(.fn, count: 3, within: .milliseconds(600)))],
+                externalOff: [Trigger(device: .external, gesture: .tap(.rightCommand, count: 2, within: .milliseconds(400)))]))
 }
 
 @Test func encodingThenParsingGivesTheSameConfig() throws {
@@ -56,33 +57,34 @@ private func configJSON(toggle: String = fnTwice, externalOff: String = shiftsHe
     #expect(
         Config.default
             == Config(
-                toggle: Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400))),
-                externalOff: Trigger(
-                    device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000)))))
+                toggle: [Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))],
+                externalOff: [
+                    Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000)))
+                ]))
     #expect(try Config.parse(Config.default.encoded()) == Config.default)
 }
 
 @Test func rejectsAnExternalOffTriggerOnTheBuiltInKeyboard() {
     #expect(throws: ConfigError.externalOffOnBuiltIn) {
-        try Config.parse(configJSON(externalOff: fnTwice))
+        try Config.parse(configJSON(externalOff: [fnTwice]))
     }
 }
 
 @Test func rejectsAToggleHeldOnTheBuiltInKeyboard() {
     #expect(throws: ConfigError.holdOnBuiltIn) {
-        try Config.parse(configJSON(toggle: #"{ "device": "builtIn", "gesture": "hold", "keys": ["fn"], "forMs": 1000 }"#))
+        try Config.parse(configJSON(toggle: [#"{ "device": "builtIn", "gesture": "hold", "keys": ["fn"], "forMs": 1000 }"#]))
     }
 }
 
 @Test func acceptsAToggleHeldOnTheExternalKeyboard() throws {
     let toggle = #"{ "device": "external", "gesture": "hold", "keys": ["leftCommand", "rightCommand"], "forMs": 1000 }"#
 
-    #expect(throws: Never.self) { try Config.parse(configJSON(toggle: toggle)) }
+    #expect(throws: Never.self) { try Config.parse(configJSON(toggle: [toggle])) }
 }
 
 @Test func reportsAnExternalOffHoldOnTheBuiltInKeyboardAsTheWrongKeyboard() {
     #expect(throws: ConfigError.externalOffOnBuiltIn) {
-        try Config.parse(configJSON(externalOff: #"{ "device": "builtIn", "gesture": "hold", "keys": ["fn"], "forMs": 1000 }"#))
+        try Config.parse(configJSON(externalOff: [#"{ "device": "builtIn", "gesture": "hold", "keys": ["fn"], "forMs": 1000 }"#]))
     }
 }
 
@@ -97,46 +99,46 @@ private func rightCommandTaps(_ count: Int, on device: String = "external") -> S
 @Test(arguments: [1, 6])
 func rejectsAToggleTapCountOutsideTwoToFive(_ count: Int) {
     #expect(throws: ConfigError.tapCountOutOfRange(count)) {
-        try Config.parse(configJSON(toggle: fnTaps(count)))
+        try Config.parse(configJSON(toggle: [fnTaps(count)]))
     }
 }
 
 @Test(arguments: [1, 6])
 func rejectsAnExternalOffTapCountOutsideTwoToFive(_ count: Int) {
     #expect(throws: ConfigError.tapCountOutOfRange(count)) {
-        try Config.parse(configJSON(externalOff: rightCommandTaps(count)))
+        try Config.parse(configJSON(externalOff: [rightCommandTaps(count)]))
     }
 }
 
 @Test(arguments: [2, 5])
 func acceptsTwoToFiveTaps(_ count: Int) {
     #expect(throws: Never.self) {
-        try Config.parse(configJSON(toggle: fnTaps(count), externalOff: rightCommandTaps(count)))
+        try Config.parse(configJSON(toggle: [fnTaps(count)], externalOff: [rightCommandTaps(count)]))
     }
 }
 
 @Test func rejectsTapsOnTheSameKeyWithDifferentCounts() {
     // Three taps to turn OFF would turn OFF and ON again: the toggle fires at the second tap.
     #expect(throws: ConfigError.conflictingTapCounts(.rightCommand, .external)) {
-        try Config.parse(configJSON(toggle: rightCommandTaps(2), externalOff: rightCommandTaps(3)))
+        try Config.parse(configJSON(toggle: [rightCommandTaps(2)], externalOff: [rightCommandTaps(3)]))
     }
 }
 
-@Test func acceptsTapsOnTheSameKeyWithTheSameCount() {
-    #expect(throws: Never.self) {
-        try Config.parse(configJSON(toggle: rightCommandTaps(2), externalOff: rightCommandTaps(2)))
+@Test func rejectsTheSameTapInBothActionsAsADuplicate() {
+    #expect(throws: ConfigError.duplicateTrigger) {
+        try Config.parse(configJSON(toggle: [rightCommandTaps(2)], externalOff: [shiftsHeld, rightCommandTaps(2)]))
     }
 }
 
 @Test func acceptsDifferentCountsOnTheSameKeyOfDifferentKeyboards() {
     #expect(throws: Never.self) {
-        try Config.parse(configJSON(toggle: rightCommandTaps(2, on: "builtIn"), externalOff: rightCommandTaps(3)))
+        try Config.parse(configJSON(toggle: [rightCommandTaps(2, on: "builtIn")], externalOff: [rightCommandTaps(3)]))
     }
 }
 
 @Test func rejectsAnUnknownKeyName() {
     #expect(throws: ConfigError.unknownKey("capsLok")) {
-        try Config.parse(configJSON(toggle: #"{ "device": "builtIn", "gesture": "tap", "key": "capsLok", "count": 2, "withinMs": 400 }"#))
+        try Config.parse(configJSON(toggle: [#"{ "device": "builtIn", "gesture": "tap", "key": "capsLok", "count": 2, "withinMs": 400 }"#]))
     }
 }
 
@@ -145,4 +147,77 @@ func acceptsTwoToFiveTaps(_ count: Int) {
         .appending(path: "../../examples/config.json").standardized
 
     #expect(try Config.parse(Data(contentsOf: example)) == Config.default)
+}
+
+@Test func rejectsATriggerThatIsNotInAList() {
+    let single = Data(#"{ "toggle": \#(fnTwice), "externalOff": [\#(shiftsHeld)], "paused": false }"#.utf8)
+
+    #expect(throws: DecodingError.self) {
+        try Config.parse(single)
+    }
+}
+
+@Test func acceptsNoToggleTriggers() {
+    // The menu can still block the built-in keyboard.
+    #expect(throws: Never.self) { try Config.parse(configJSON(toggle: [])) }
+}
+
+@Test func rejectsNoExternalOffTriggers() {
+    #expect(throws: ConfigError.noExternalOffTrigger) {
+        try Config.parse(configJSON(externalOff: []))
+    }
+}
+
+@Test func rejectsAnyExternalOffTriggerOnTheBuiltInKeyboard() {
+    #expect(throws: ConfigError.externalOffOnBuiltIn) {
+        try Config.parse(configJSON(externalOff: [shiftsHeld, fnTwice]))
+    }
+}
+
+@Test func rejectsAnyToggleHeldOnTheBuiltInKeyboard() {
+    let fnHeld = #"{ "device": "builtIn", "gesture": "hold", "keys": ["fn"], "forMs": 1000 }"#
+
+    #expect(throws: ConfigError.holdOnBuiltIn) {
+        try Config.parse(configJSON(toggle: [fnTwice, fnHeld]))
+    }
+}
+
+@Test func rejectsAnyToggleTapCountOutsideTwoToFive() {
+    #expect(throws: ConfigError.tapCountOutOfRange(6)) {
+        try Config.parse(configJSON(toggle: [fnTwice, rightCommandTaps(6, on: "builtIn")]))
+    }
+}
+
+@Test func rejectsDifferentTapCountsWithinOneAction() {
+    #expect(throws: ConfigError.conflictingTapCounts(.fn, .builtIn)) {
+        try Config.parse(configJSON(toggle: [fnTwice, fnTaps(3)]))
+    }
+}
+
+@Test func rejectsDifferentTapCountsAcrossActions() {
+    #expect(throws: ConfigError.conflictingTapCounts(.rightCommand, .external)) {
+        try Config.parse(configJSON(toggle: [fnTwice, rightCommandTaps(2)], externalOff: [rightCommandTaps(3)]))
+    }
+}
+
+@Test func rejectsTapsThatDifferOnlyInTimeAsDuplicates() {
+    let slowerFnTwice = #"{ "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 650 }"#
+
+    #expect(throws: ConfigError.duplicateTrigger) {
+        try Config.parse(configJSON(toggle: [fnTwice, slowerFnTwice]))
+    }
+}
+
+@Test func rejectsHoldsThatDifferOnlyInTimeAsDuplicates() {
+    let shiftsHeldLonger = #"{ "device": "external", "gesture": "hold", "keys": ["rightShift", "leftShift"], "forMs": 2000 }"#
+
+    #expect(throws: ConfigError.duplicateTrigger) {
+        try Config.parse(configJSON(externalOff: [shiftsHeld, shiftsHeldLonger]))
+    }
+}
+
+@Test func acceptsTheSameTapOnBothKeyboards() {
+    #expect(throws: Never.self) {
+        try Config.parse(configJSON(toggle: [rightCommandTaps(2, on: "builtIn"), rightCommandTaps(2)]))
+    }
 }

@@ -5,36 +5,24 @@ import KasaneCore
 /// once, the way macOS applies a new keyboard shortcut; there is nothing to apply or revert.
 @MainActor
 final class SettingsModel: ObservableObject {
-    /// One row of the settings window: an action and the trigger that does it.
-    enum Slot: CaseIterable {
+    /// One section of the settings window: an action and the triggers that do it.
+    enum Action: CaseIterable {
         case toggle
         case externalOff
 
-        var keyPath: WritableKeyPath<Config, Trigger> {
+        var keyPath: WritableKeyPath<Config, [Trigger]> {
             switch self {
             case .toggle: \.toggle
             case .externalOff: \.externalOff
             }
         }
-
-        /// The one trigger the pop-up offers before "Customize…": the default config's.
-        var preset: Trigger { Config.default[keyPath: keyPath] }
-    }
-
-    /// The items of a slot's pop-up.
-    enum Choice: Hashable {
-        case preset
-        /// The slot's trigger when it is not the preset.
-        case custom
-        /// Records a new trigger.
-        case customize
     }
 
     /// nil until loaded, and while kasaned has no usable config.
     @Published private(set) var config: Config?
-    @Published private(set) var recordingSlot: Slot?
-    /// Why the last change to a slot did not happen; the slot keeps its trigger.
-    @Published private(set) var problems: [Slot: String] = [:]
+    @Published private(set) var recordingAction: Action?
+    /// Why the last change to an action did not happen; its triggers stay as they were.
+    @Published private(set) var problems: [Action: String] = [:]
     /// Why the config could not be read or the default config could not be saved.
     @Published private(set) var configProblem: String?
 
@@ -54,20 +42,33 @@ final class SettingsModel: ObservableObject {
         }
     }
 
-    func choice(for slot: Slot, in config: Config) -> Choice {
-        config[keyPath: slot.keyPath] == slot.preset ? .preset : .custom
+    /// The external keyboard must keep one way back, so its last trigger stays.
+    func canRemove(from action: Action, in config: Config) -> Bool {
+        action == .toggle || config.externalOff.count > 1
     }
 
-    func choose(_ choice: Choice, for slot: Slot) {
-        switch choice {
-        case .preset:
-            Task { await set(slot.preset, in: slot) }
-        case .custom:
-            break
-        case .customize:
-            // Set before the task starts, so the pop-up redraws without "Customize…" selected.
-            recordingSlot = slot
-            Task { await record(for: slot) }
+    func remove(_ trigger: Trigger, from action: Action) async {
+        await change(action) { $0[keyPath: action.keyPath].removeAll { $0 == trigger } }
+    }
+
+    /// Records a new trigger and adds it to `action`.
+    func add(to action: Action) async {
+        recordingAction = action
+        defer { recordingAction = nil }
+        problems[action] = nil
+        do {
+            switch try await client.record() {
+            case .recorded(let trigger):
+                await change(action) { $0[keyPath: action.keyPath].append(trigger) }
+            case .rejected(let error):
+                problems[action] = TriggerText.problem(error)
+            case .cancelled:
+                break
+            case .busy:
+                problems[action] = String(localized: "Another recording is in progress.")
+            }
+        } catch {
+            problems[action] = error.localizedDescription
         }
     }
 
@@ -92,52 +93,29 @@ final class SettingsModel: ObservableObject {
         }
     }
 
-    private func record(for slot: Slot) async {
-        defer { recordingSlot = nil }
-        problems[slot] = nil
-        do {
-            switch try await client.record() {
-            case .recorded(let trigger):
-                await set(trigger, in: slot)
-            case .rejected(let error):
-                problems[slot] = TriggerText.problem(error)
-            case .cancelled:
-                break
-            case .busy:
-                problems[slot] = String(localized: "Another recording is in progress.")
-            }
-        } catch {
-            problems[slot] = error.localizedDescription
-        }
-    }
-
-    private func set(_ trigger: Trigger, in slot: Slot) async {
-        await change(slot) { $0[keyPath: slot.keyPath] = trigger }
-    }
-
     /// Sends the edited config to kasaned when it still passes the rules kasaned applies. A
-    /// rejection shows under `slot`, and the config stays as it was.
-    private func change(_ slot: Slot, _ edit: (inout Config) -> Void) async {
-        guard var newConfig = config else { preconditionFailure("the slots are hidden without a config") }
+    /// rejection shows under `action`, and the config stays as it was.
+    private func change(_ action: Action, _ edit: (inout Config) -> Void) async {
+        guard var newConfig = config else { preconditionFailure("the actions are hidden without a config") }
         edit(&newConfig)
         do {
             try newConfig.validate()
         } catch {
-            problems[slot] = TriggerText.problem(error)
+            problems[action] = TriggerText.problem(error)
             return
         }
         do {
             switch try await client.apply(newConfig) {
             case .applied:
                 config = newConfig
-                problems[slot] = nil
+                problems[action] = nil
             case .rejected(let error):
-                problems[slot] = TriggerText.problem(error)
+                problems[action] = TriggerText.problem(error)
             case .unreadable(let reason), .notSaved(let reason):
-                problems[slot] = reason
+                problems[action] = reason
             }
         } catch {
-            problems[slot] = error.localizedDescription
+            problems[action] = error.localizedDescription
         }
     }
 }

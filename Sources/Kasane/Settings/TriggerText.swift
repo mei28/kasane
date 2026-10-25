@@ -70,6 +70,10 @@ enum TriggerText {
 
     static func problem(_ error: ConfigError) -> String {
         switch error {
+        case .noExternalOffTrigger:
+            String(localized: "Keep at least one way back on the external keyboard.")
+        case .duplicateTrigger:
+            String(localized: "These keys are already in the list.")
         case .externalOffOnBuiltIn:
             String(localized: "Press the keys on the external keyboard.")
         case .holdOnBuiltIn:

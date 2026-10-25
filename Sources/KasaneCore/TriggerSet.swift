@@ -18,9 +18,9 @@ public struct TriggerSet: Sendable {
     private var off: [TriggerRecognizer]
 
     public init(_ config: Config) {
-        // The toggle is in both lists; Blocker looks only at ON while OFF and only at OFF while ON,
-        // so the one gesture switches either way.
-        self.init(on: [config.toggle], off: [config.toggle, config.externalOff])
+        // The toggle triggers are in both lists; Blocker looks only at ON while OFF and only at OFF
+        // while ON, so each of them switches either way.
+        self.init(on: config.toggle, off: config.toggle + config.externalOff)
     }
 
     /// No triggers: what kasaned runs while it has no usable config.

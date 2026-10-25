@@ -32,6 +32,16 @@
         }
       }
     },
+    "Add…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加…"
+          }
+        }
+      }
+    },
     "Another recording is in progress.": {
       "localizations": {
         "ja": {
@@ -108,16 +118,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "kasaned から設定を読めません：%@"
-          }
-        }
-      }
-    },
-    "Customize…": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "カスタマイズ…"
           }
         }
       }
@@ -232,12 +232,12 @@
         }
       }
     },
-    "Keys": {
+    "Keep at least one way back on the external keyboard.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "キー"
+            "value": "外付けキーボードで戻すキーを、少なくとも 1 つ残してください。"
           }
         }
       }
@@ -328,6 +328,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "キーが押されませんでした。"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "なし"
           }
         }
       }
@@ -448,6 +458,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kasane を再起動"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除"
           }
         }
       }
@@ -598,6 +618,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "メニューバーは、再起動すると切り替わります。"
+          }
+        }
+      }
+    },
+    "These keys are already in the list.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同じキーがすでにあります。"
           }
         }
       }

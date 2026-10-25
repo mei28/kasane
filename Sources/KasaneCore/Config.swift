@@ -1,16 +1,16 @@
 import Foundation
 
-/// The two things the settings window sets: the key that switches the built-in keyboard, and the
-/// way back from the external keyboard.
+/// The two actions the settings window sets, each with its triggers: switching the built-in
+/// keyboard, and the way back from the external keyboard.
 public struct Config: Codable, Equatable, Sendable {
-    /// Turns ON while OFF and OFF while ON.
-    public var toggle: Trigger
-    /// Turns OFF from the external keyboard, for when the toggle is out of reach.
-    public var externalOff: Trigger
+    /// Each turns ON while OFF and OFF while ON.
+    public var toggle: [Trigger]
+    /// Each turns OFF from the external keyboard, for when the toggle is out of reach.
+    public var externalOff: [Trigger]
     /// Paused, kasane ignores every trigger and keeps the built-in keyboard working.
     public var paused: Bool
 
-    public init(toggle: Trigger, externalOff: Trigger, paused: Bool = false) {
+    public init(toggle: [Trigger], externalOff: [Trigger], paused: Bool = false) {
         self.toggle = toggle
         self.externalOff = externalOff
         self.paused = paused
@@ -19,8 +19,8 @@ public struct Config: Codable, Equatable, Sendable {
     /// What kasaned writes on its first start: fn tapped twice on the built-in keyboard toggles,
     /// and both Shift keys held on the external keyboard turn OFF.
     public static let `default` = Config(
-        toggle: Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400))),
-        externalOff: Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000))))
+        toggle: [Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))],
+        externalOff: [Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000)))])
 
     public static func parse(_ data: Data) throws -> Config {
         let config = try JSONDecoder().decode(Config.self, from: data)
@@ -37,7 +37,11 @@ public struct Config: Codable, Equatable, Sendable {
 
     /// Throws the first rule this config breaks. parse runs it on every config it reads.
     public func validate() throws(ConfigError) {
-        let triggers: [(trigger: Trigger, isExternalOff: Bool)] = [(toggle, false), (externalOff, true)]
+        guard !externalOff.isEmpty else {
+            throw .noExternalOffTrigger
+        }
+        let triggers: [(trigger: Trigger, isExternalOff: Bool)] =
+            toggle.map { ($0, false) } + externalOff.map { ($0, true) }
         for entry in triggers {
             try Self.check(entry.trigger, isExternalOff: entry.isExternalOff)
         }
@@ -72,17 +76,23 @@ public struct Config: Codable, Equatable, Sendable {
         {
             throw .conflictingTapCounts(key, trigger.device)
         }
+        // Two rows that read the same would be one trigger listed twice.
+        if trigger.matchesIgnoringTiming(other) {
+            throw .duplicateTrigger
+        }
     }
 }
 
 /// A config that could leave the user without a working keyboard. kasaned runs without triggers
 /// rather than use one, and the app checks each change against these before sending it.
 public enum ConfigError: Error, Codable, Equatable, Sendable {
+    case noExternalOffTrigger
     case externalOffOnBuiltIn
     case holdOnBuiltIn
     case unknownKey(String)
     case tapCountOutOfRange(Int)
     case conflictingTapCounts(Key, Device)
+    case duplicateTrigger
 }
 
 public enum Device: String, Codable, Sendable {
@@ -97,6 +107,22 @@ public struct Trigger: Hashable, Sendable {
     public init(device: Device, gesture: Gesture) {
         self.device = device
         self.gesture = gesture
+    }
+}
+
+extension Trigger {
+    /// Whether two triggers read the same in the settings window: the same keyboard, keys, and
+    /// count, whatever their timing.
+    fileprivate func matchesIgnoringTiming(_ other: Trigger) -> Bool {
+        guard device == other.device else { return false }
+        switch (gesture, other.gesture) {
+        case (.tap(let key, let count, _), .tap(let otherKey, let otherCount, _)):
+            return key == otherKey && count == otherCount
+        case (.hold(let keys, _), .hold(let otherKeys, _)):
+            return keys == otherKeys
+        case (.tap, .hold), (.hold, .tap):
+            return false
+        }
     }
 }
 
