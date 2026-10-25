@@ -65,6 +65,10 @@ public struct Config: Codable, Equatable, Sendable {
         if case .tap(_, let count, _) = trigger.gesture, !(2...5).contains(count) {
             throw .tapCountOutOfRange(count)
         }
+        // Without ⌃ or ⌘, a shortcut is ordinary typing: ⇧K is a capital, ⌥← moves by word.
+        if case .shortcut(let modifiers, _) = trigger.gesture, modifiers.isDisjoint(with: [.control, .command]) {
+            throw .shortcutNeedsCommandOrControl
+        }
     }
 
     /// The rules for two triggers together.
@@ -93,6 +97,7 @@ public enum ConfigError: Error, Codable, Equatable, Sendable {
     case tapCountOutOfRange(Int)
     case conflictingTapCounts(Key, Device)
     case duplicateTrigger
+    case shortcutNeedsCommandOrControl
 }
 
 public enum Device: String, Codable, Sendable {
@@ -120,7 +125,9 @@ extension Trigger {
             return key == otherKey && count == otherCount
         case (.hold(let keys, _), .hold(let otherKeys, _)):
             return keys == otherKeys
-        case (.tap, .hold), (.hold, .tap):
+        case (.shortcut, .shortcut):
+            return gesture == other.gesture
+        case (.tap, _), (.hold, _), (.shortcut, _):
             return false
         }
     }
@@ -130,16 +137,19 @@ public enum Gesture: Hashable, Sendable {
     /// `count` presses of one key, the last within `within` of the first.
     case tap(Key, count: Int, within: Duration)
     case hold(Set<Key>, for: Duration)
+    /// One shortcut key pressed while exactly these modifiers are held, such as ⌃⌥⌘K.
+    case shortcut(Set<Modifier>, ShortcutKey)
 }
 
 extension Trigger: Codable {
     private enum CodingKeys: String, CodingKey {
-        case device, gesture, key, count, withinMs, keys, forMs
+        case device, gesture, key, count, withinMs, keys, forMs, modifiers
     }
 
     private enum GestureName: String, Codable {
         case tap
         case hold
+        case shortcut
     }
 
     public init(from decoder: any Decoder) throws {
@@ -155,6 +165,10 @@ extension Trigger: Codable {
             gesture = .hold(
                 try container.decode(Set<Key>.self, forKey: .keys),
                 for: .milliseconds(try container.decode(Int.self, forKey: .forMs)))
+        case .shortcut:
+            gesture = .shortcut(
+                try container.decode(Set<Modifier>.self, forKey: .modifiers),
+                try container.decode(ShortcutKey.self, forKey: .key))
         }
     }
 
@@ -171,6 +185,11 @@ extension Trigger: Codable {
             try container.encode(GestureName.hold, forKey: .gesture)
             try container.encode(keys.sorted { $0.rawValue < $1.rawValue }, forKey: .keys)
             try container.encode(duration.wholeMilliseconds, forKey: .forMs)
+        case .shortcut(let modifiers, let key):
+            try container.encode(GestureName.shortcut, forKey: .gesture)
+            // In the order macOS writes them, so the file reads like the shortcut.
+            try container.encode(Modifier.allCases.filter(modifiers.contains), forKey: .modifiers)
+            try container.encode(key, forKey: .key)
         }
     }
 }

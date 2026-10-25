@@ -33,6 +33,42 @@ enum TriggerText {
             String(localized: "Hold \(keys(held)) for \(seconds(duration)) s on the built-in keyboard")
         case (.hold(let held, let duration), .external):
             String(localized: "Hold \(keys(held)) for \(seconds(duration)) s on the external keyboard")
+        case (.shortcut(let modifiers, let key), nil):
+            String(localized: "Press \(shortcut(modifiers, key))")
+        case (.shortcut(let modifiers, let key), .builtIn):
+            String(localized: "Press \(shortcut(modifiers, key)) on the built-in keyboard")
+        case (.shortcut(let modifiers, let key), .external):
+            String(localized: "Press \(shortcut(modifiers, key)) on the external keyboard")
+        }
+    }
+
+    /// A shortcut as macOS writes it, such as ⌃⌥⌘K.
+    private static func shortcut(_ modifiers: Set<Modifier>, _ key: ShortcutKey) -> String {
+        Modifier.allCases.filter(modifiers.contains).map(symbol(of:)).joined() + label(of: key)
+    }
+
+    private static func symbol(of modifier: Modifier) -> String {
+        switch modifier {
+        case .control: "⌃"
+        case .option: "⌥"
+        case .shift: "⇧"
+        case .command: "⌘"
+        }
+    }
+
+    /// The key as macOS menus show it: symbols for the keys that have one, capitals for letters.
+    private static func label(of key: ShortcutKey) -> String {
+        switch key {
+        case .return: "↩"
+        case .escape: "⎋"
+        case .delete: "⌫"
+        case .tab: "⇥"
+        case .space: String(localized: "Space")
+        case .left: "←"
+        case .right: "→"
+        case .up: "↑"
+        case .down: "↓"
+        default: key.rawValue.uppercased()
         }
     }
 
@@ -72,6 +108,8 @@ enum TriggerText {
         switch error {
         case .noExternalOffTrigger:
             String(localized: "Keep at least one way back on the external keyboard.")
+        case .shortcutNeedsCommandOrControl:
+            String(localized: "A shortcut needs ⌃ or ⌘.")
         case .duplicateTrigger:
             String(localized: "These keys are already in the list.")
         case .externalOffOnBuiltIn:

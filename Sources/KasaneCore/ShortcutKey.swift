@@ -108,3 +108,13 @@ extension ShortcutKey {
         self = key
     }
 }
+
+extension ShortcutKey: Codable {
+    public init(from decoder: any Decoder) throws {
+        let name = try decoder.singleValueContainer().decode(String.self)
+        guard let key = ShortcutKey(rawValue: name) else {
+            throw ConfigError.unknownKey(name)
+        }
+        self = key
+    }
+}

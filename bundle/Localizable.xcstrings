@@ -12,6 +12,16 @@
         }
       }
     },
+    "A shortcut needs ⌃ or ⌘.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ショートカットには ⌃ か ⌘ を含めてください。"
+          }
+        }
+      }
+    },
     "A tap trigger needs 2 to 5 taps, not %lld.": {
       "localizations": {
         "ja": {
@@ -382,6 +392,16 @@
         }
       }
     },
+    "Press %@": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ を押す"
+          }
+        }
+      }
+    },
     "Press %@ %lld times": {
       "localizations": {
         "ja": {
@@ -408,6 +428,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "外付けの %1$@ を %2$lld 回押す"
+          }
+        }
+      }
+    },
+    "Press %@ on the built-in keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内蔵の %@ を押す"
+          }
+        }
+      }
+    },
+    "Press %@ on the external keyboard": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外付けの %@ を押す"
           }
         }
       }
@@ -538,6 +578,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定…"
+          }
+        }
+      }
+    },
+    "Space": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スペース"
           }
         }
       }

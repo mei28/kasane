@@ -63,3 +63,13 @@ extension Key: Codable {
         self = key
     }
 }
+
+extension Modifier: Codable {
+    public init(from decoder: any Decoder) throws {
+        let name = try decoder.singleValueContainer().decode(String.self)
+        guard let modifier = Modifier(rawValue: name) else {
+            throw ConfigError.unknownKey(name)
+        }
+        self = modifier
+    }
+}

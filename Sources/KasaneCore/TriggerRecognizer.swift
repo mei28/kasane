@@ -10,6 +10,8 @@ public struct TriggerRecognizer: Sendable {
             gesture = Tap(usage: key.usage, count: count, window: window)
         case .hold(let keys, let duration):
             gesture = Hold(usages: Set(keys.map(\.usage)), duration: duration)
+        case .shortcut(let modifiers, let key):
+            gesture = Shortcut(modifiers: modifiers, key: key.usage)
         }
     }
 
@@ -111,5 +113,71 @@ private struct Hold: GestureRecognizer {
         guard let since = allDownSince, time - since >= duration else { return false }
         allDownSince = nil
         return true
+    }
+}
+
+/// A shortcut key pressed while exactly the given modifiers are held, such as ⌃⌥⌘K. It completes
+/// only once every key of it is up again and the shortcut key was down for under a second.
+///
+/// Waiting for every key to come up means no key of the keyboard is down when kasaned seizes or
+/// releases it, so none can stay stuck; the time limit keeps the external keyboard's weight, which
+/// holds keys far longer, from completing it.
+private struct Shortcut: GestureRecognizer {
+    static let longestPress: Duration = .seconds(1)
+
+    let modifiers: Set<Modifier>
+    let key: HIDUsage
+    /// fn and the modifier keys seen going down and not yet up.
+    private var held: Set<Key> = []
+    /// When the shortcut key went down with exactly the modifiers held; nil while no attempt runs.
+    private var keyDownAt: Duration?
+    /// Whether the shortcut key of the running attempt came up in time.
+    private var keyReleased = false
+
+    init(modifiers: Set<Modifier>, key: HIDUsage) {
+        self.modifiers = modifiers
+        self.key = key
+    }
+
+    mutating func handle(_ event: KeyEvent) -> Bool {
+        if let pressed = Key(usage: event.usage) {
+            if event.isDown {
+                held.insert(pressed)
+                // A modifier added during an attempt makes it another shortcut.
+                startOver()
+            } else {
+                held.remove(pressed)
+            }
+        } else if event.usage == key {
+            if event.isDown {
+                startOver()
+                // fn counts as a modifier the shortcut does not have.
+                if Set(held.compactMap(\.modifier)) == modifiers, !held.contains(.fn) {
+                    keyDownAt = event.time
+                }
+            } else if let downAt = keyDownAt {
+                if event.time - downAt < Self.longestPress {
+                    keyReleased = true
+                } else {
+                    startOver()
+                }
+            }
+        } else if event.isDown {
+            // Another key makes it another shortcut. Releases alone, such as the built-in
+            // keyboard's usage 0x01 after most keys, change nothing.
+            startOver()
+        }
+        guard keyReleased, held.isEmpty else { return false }
+        startOver()
+        return true
+    }
+
+    private mutating func startOver() {
+        keyDownAt = nil
+        keyReleased = false
+    }
+
+    func advance(to time: Duration) -> Bool {
+        false
     }
 }

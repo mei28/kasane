@@ -221,3 +221,71 @@ func acceptsTwoToFiveTaps(_ count: Int) {
         try Config.parse(configJSON(toggle: [rightCommandTaps(2, on: "builtIn"), rightCommandTaps(2)]))
     }
 }
+
+private func shortcut(_ modifiers: [String], _ key: String, on device: String = "external") -> String {
+    let names = modifiers.map { #""\#($0)""# }.joined(separator: ", ")
+    return #"{ "device": "\#(device)", "gesture": "shortcut", "modifiers": [\#(names)], "key": "\#(key)" }"#
+}
+
+@Test func parsesAShortcut() throws {
+    let config = try Config.parse(configJSON(externalOff: [shortcut(["option", "command"], "k")]))
+
+    #expect(config.externalOff == [Trigger(device: .external, gesture: .shortcut([.option, .command], .k))])
+}
+
+@Test func writesModifiersInTheOrderMacOSShowsThem() throws {
+    let config = try Config.parse(configJSON(externalOff: [shortcut(["command", "shift", "control", "option"], "k")]))
+    let written = try JSONSerialization.jsonObject(with: config.encoded()) as? [String: Any]
+    let externalOff = written?["externalOff"] as? [[String: Any]]
+
+    #expect(externalOff?.first?["modifiers"] as? [String] == ["control", "option", "shift", "command"])
+    #expect(try Config.parse(config.encoded()) == config)
+}
+
+@Test(arguments: [shortcut(["hyper"], "k"), shortcut(["command"], "f13")])
+func rejectsUnknownNamesInAShortcut(_ trigger: String) {
+    #expect(throws: ConfigError.self) {
+        try Config.parse(configJSON(externalOff: [trigger]))
+    }
+}
+
+@Test(arguments: [[], ["shift"], ["option"], ["option", "shift"]])
+func rejectsAShortcutWithoutControlOrCommand(_ modifiers: [String]) {
+    // ⇧K types a capital and ⌥← moves by word: both fire in ordinary typing.
+    #expect(throws: ConfigError.shortcutNeedsCommandOrControl) {
+        try Config.parse(configJSON(externalOff: [shiftsHeld, shortcut(modifiers, "k")]))
+    }
+}
+
+@Test(arguments: [["control"], ["command"], ["control", "shift"]])
+func acceptsAShortcutWithControlOrCommand(_ modifiers: [String]) {
+    #expect(throws: Never.self) {
+        try Config.parse(configJSON(externalOff: [shiftsHeld, shortcut(modifiers, "k")]))
+    }
+}
+
+@Test func acceptsAShortcutOnTheBuiltInKeyboardToToggle() {
+    #expect(throws: Never.self) {
+        try Config.parse(configJSON(toggle: [fnTwice, shortcut(["control"], "k", on: "builtIn")]))
+    }
+}
+
+@Test func rejectsAShortcutOnTheBuiltInKeyboardToTurnOff() {
+    #expect(throws: ConfigError.externalOffOnBuiltIn) {
+        try Config.parse(configJSON(externalOff: [shiftsHeld, shortcut(["control"], "k", on: "builtIn")]))
+    }
+}
+
+@Test func acceptsTheSameShortcutOnBothKeyboards() {
+    #expect(throws: Never.self) {
+        try Config.parse(
+            configJSON(toggle: [shortcut(["control"], "k", on: "builtIn"), shortcut(["control"], "k")]))
+    }
+}
+
+@Test func rejectsTheSameShortcutTwiceOnOneKeyboard() {
+    #expect(throws: ConfigError.duplicateTrigger) {
+        try Config.parse(
+            configJSON(toggle: [shortcut(["control"], "k")], externalOff: [shiftsHeld, shortcut(["control"], "k")]))
+    }
+}
