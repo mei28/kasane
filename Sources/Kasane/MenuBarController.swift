@@ -26,20 +26,16 @@ final class MenuBarController: NSObject {
         statusItem.menu = menu(for: status)
     }
 
-    private func icon(for status: Status?) -> NSImage? {
-        let name =
+    private func icon(for status: Status?) -> NSImage {
+        let state: MenuBarIcon.State =
             switch status {
-            case .none: "exclamationmark.triangle"
-            case .some(let status) where status.builtInKeyboard != .present || status.configError != nil:
-                "exclamationmark.triangle"
-            case .some(let status) where status.isPaused: "pause.circle"
-            case .some(let status) where status.isOn: "keyboard.fill"
-            case .some: "keyboard"
+            case .none: .warning
+            case .some(let status) where status.builtInKeyboard != .present || status.configError != nil: .warning
+            case .some(let status) where status.isPaused: .paused
+            case .some(let status) where status.isOn: .on
+            case .some: .off
             }
-        let image = NSImage(systemSymbolName: name, accessibilityDescription: "Kasane")
-        // Template images follow the menu bar's light or dark appearance.
-        image?.isTemplate = true
-        return image
+        return MenuBarIcon.image(state)
     }
 
     private func menu(for status: Status?) -> NSMenu {
