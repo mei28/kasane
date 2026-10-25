@@ -9,6 +9,9 @@ final class BuiltInKeyboard {
 
     init(device: IOHIDDevice) throws(IOKitError) {
         self.device = device
+        // Open before the lookup: without Input Monitoring the open fails with kIOReturnNotPermitted,
+        // which kasaned waits out, while the lookup only comes back empty.
+        try check(IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone)), "open the built-in keyboard")
         let matching: [String: Any] = [
             kIOHIDElementUsagePageKey: kHIDPage_LEDs,
             kIOHIDElementUsageKey: kHIDUsage_LED_CapsLock,
@@ -18,7 +21,6 @@ final class BuiltInKeyboard {
             throw IOKitError(operation: "find the caps lock LED", code: kIOReturnNotFound)
         }
         capsLockLED = led
-        try check(IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone)), "open the built-in keyboard")
     }
 
     /// Seizes the keyboard. When seizing fails, the keyboard is observed again before the
