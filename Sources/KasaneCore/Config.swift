@@ -75,7 +75,7 @@ public enum Device: String, Codable, Sendable {
     case external
 }
 
-public struct Trigger: Equatable, Sendable {
+public struct Trigger: Hashable, Sendable {
     public var device: Device
     public var gesture: Gesture
 
@@ -85,7 +85,7 @@ public struct Trigger: Equatable, Sendable {
     }
 }
 
-public enum Gesture: Equatable, Sendable {
+public enum Gesture: Hashable, Sendable {
     /// `count` presses of one key, the last within `within` of the first.
     case tap(Key, count: Int, within: Duration)
     case hold(Set<Key>, for: Duration)
