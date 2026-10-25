@@ -26,12 +26,15 @@ Any keyboard that is not built in counts, including devices that only look like 
 YubiKey. With nothing else connected, ON would leave no keyboard that can type; locking the screen
 with the Touch ID button or closing the lid still turns it OFF.
 
-The settings window of the menu bar app, Kasane, sets two triggers. One blocks and unblocks the
-built-in keyboard; by default it is fn tapped twice on the built-in keyboard. The other unblocks
-from the external keyboard, for when the first is out of reach; by default it is both Shift keys
-held for a second. Each trigger taps one key 2 to 5 times or holds keys together. The unblock
-trigger must be on the external keyboard, and the built-in keyboard takes no hold triggers,
-because the external keyboard's weight could hold a key down.
+The settings window of the menu bar app, Kasane, lists the triggers for two actions. "Block and
+Unblock" switches the built-in keyboard; by default it holds fn tapped twice on the built-in
+keyboard. "Unblock from the External Keyboard" is the way back when those keys are out of reach;
+by default it holds both Shift keys held for a second. "Add…" records a trigger and each row can
+be removed. A trigger taps fn or a modifier 2 to 5 times, holds keys together, or is a shortcut
+such as ⌃⌥⌘K. The unblock triggers must be on the external keyboard and at least one must stay,
+the built-in keyboard takes no hold triggers because the external keyboard's weight could hold a
+key down, and a shortcut needs ⌃ or ⌘. A shortcut also reaches the app in front, since kasaned
+observes keys without taking them.
 
 kasaned keeps the config in `/Library/Application Support/Kasane/config.json`, and
 [examples/config.json](examples/config.json) shows the default. The Caps Lock LED on the built-in
