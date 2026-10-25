@@ -12,20 +12,26 @@ public struct Fired: Equatable, Sendable {
 /// The recognizers for every ON and OFF trigger in a config. Each step goes to every
 /// recognizer, so each keeps its own progress.
 public struct TriggerSet: Sendable {
-    private let config: Config
+    private let onTriggers: [Trigger]
+    private let offTriggers: [Trigger]
     private var on: [TriggerRecognizer]
     private var off: [TriggerRecognizer]
 
     public init(_ config: Config) {
-        self.config = config
-        on = config.on.map(TriggerRecognizer.init)
-        off = config.off.map(TriggerRecognizer.init)
+        self.init(on: config.on, off: config.off)
+    }
+
+    private init(on onTriggers: [Trigger], off offTriggers: [Trigger]) {
+        self.onTriggers = onTriggers
+        self.offTriggers = offTriggers
+        on = onTriggers.map(TriggerRecognizer.init)
+        off = offTriggers.map(TriggerRecognizer.init)
     }
 
     /// Forgets every gesture in progress. kasaned calls it whenever it turns ON or OFF, so taps
     /// from before the switch cannot complete a gesture after it.
     public mutating func reset() {
-        self = TriggerSet(config)
+        self = TriggerSet(on: onTriggers, off: offTriggers)
     }
 
     public mutating func handle(_ event: KeyEvent) -> Fired {
