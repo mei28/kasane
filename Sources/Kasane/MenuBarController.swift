@@ -40,6 +40,8 @@ final class MenuBarController: NSObject {
 
     private func menu(for status: Status?) -> NSMenu {
         let menu = NSMenu()
+        // The items set isEnabled from kasaned's status; auto-enabling would enable every item with a target.
+        menu.autoenablesItems = false
         let line = NSMenuItem(title: MenuText.statusLine(status), action: nil, keyEquivalent: "")
         line.isEnabled = false
         menu.addItem(line)
