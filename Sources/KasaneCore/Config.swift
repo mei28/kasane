@@ -1,25 +1,26 @@
 import Foundation
 
-public struct Config: Equatable, Sendable {
-    public var on: [Trigger]
-    public var off: [Trigger]
+/// The two things the settings window sets: the key that switches the built-in keyboard, and the
+/// way back from the external keyboard.
+public struct Config: Codable, Equatable, Sendable {
+    /// Turns ON while OFF and OFF while ON.
+    public var toggle: Trigger
+    /// Turns OFF from the external keyboard, for when the toggle is out of reach.
+    public var externalOff: Trigger
     /// Paused, kasane ignores every trigger and keeps the built-in keyboard working.
     public var paused: Bool
 
-    public init(on: [Trigger], off: [Trigger], paused: Bool = false) {
-        self.on = on
-        self.off = off
+    public init(toggle: Trigger, externalOff: Trigger, paused: Bool = false) {
+        self.toggle = toggle
+        self.externalOff = externalOff
         self.paused = paused
     }
 
     /// What kasaned writes on its first start: fn tapped twice on the built-in keyboard toggles,
     /// and both Shift keys held on the external keyboard turn OFF.
     public static let `default` = Config(
-        on: [Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))],
-        off: [
-            Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400))),
-            Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000))),
-        ])
+        toggle: Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400))),
+        externalOff: Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000))))
 
     public static func parse(_ data: Data) throws -> Config {
         let config = try JSONDecoder().decode(Config.self, from: data)
@@ -36,59 +37,37 @@ public struct Config: Equatable, Sendable {
 
     /// Throws the first rule this config breaks. parse runs it on every config it reads.
     public func validate() throws(ConfigError) {
-        guard off.contains(where: { $0.device == .external }) else {
-            throw .noExternalOffTrigger
+        guard externalOff.device == .external else {
+            throw .externalOffOnBuiltIn
         }
         // The external keyboard's weight alone could hold a built-in key down.
-        for trigger in on + off where trigger.device == .builtIn {
-            if case .hold = trigger.gesture { throw .holdOnBuiltIn }
+        if toggle.device == .builtIn, case .hold = toggle.gesture {
+            throw .holdOnBuiltIn
         }
         // One tap fires on ordinary use of the key, and more than five is hard to hit reliably.
-        for trigger in on + off {
+        for trigger in [toggle, externalOff] {
             if case .tap(_, let count, _) = trigger.gesture, !(2...5).contains(count) {
                 throw .tapCountOutOfRange(count)
             }
         }
         // Different counts on one key fire the shorter one on the way to the longer one.
-        var tapCounts: [TapSlot: Int] = [:]
-        for trigger in on + off {
-            guard case .tap(let key, let count, _) = trigger.gesture else { continue }
-            let slot = TapSlot(device: trigger.device, key: key)
-            if let seen = tapCounts[slot], seen != count {
-                throw .conflictingTapCounts(key, trigger.device)
-            }
-            tapCounts[slot] = count
+        if case .tap(let key, let count, _) = toggle.gesture,
+            case .tap(let otherKey, let otherCount, _) = externalOff.gesture,
+            toggle.device == externalOff.device, key == otherKey, count != otherCount
+        {
+            throw .conflictingTapCounts(key, toggle.device)
         }
-    }
-
-    private struct TapSlot: Hashable {
-        let device: Device
-        let key: Key
     }
 }
 
-/// A config that could leave the user without a working keyboard. kasaned refuses to start on
-/// any of these, so it never seizes the built-in keyboard with a bad config.
+/// A config that could leave the user without a working keyboard. kasaned runs without triggers
+/// rather than use one, and the app checks each change against these before sending it.
 public enum ConfigError: Error, Codable, Equatable, Sendable {
-    case noExternalOffTrigger
+    case externalOffOnBuiltIn
     case holdOnBuiltIn
     case unknownKey(String)
     case tapCountOutOfRange(Int)
     case conflictingTapCounts(Key, Device)
-}
-
-extension Config: Codable {
-    private enum CodingKeys: String, CodingKey {
-        case on, off, paused
-    }
-
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        on = try container.decode([Trigger].self, forKey: .on)
-        off = try container.decode([Trigger].self, forKey: .off)
-        // A config written before pausing existed, or by hand, is not paused.
-        paused = try container.decodeIfPresent(Bool.self, forKey: .paused) ?? false
-    }
 }
 
 public enum Device: String, Codable, Sendable {

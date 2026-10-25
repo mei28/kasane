@@ -1,10 +1,5 @@
 {
-  "on": [
-    { "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 400 }
-  ],
-  "off": [
-    { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
-    { "device": "external", "gesture": "tap", "key": "rightCommand", "count": 2, "withinMs": 400 },
-    { "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 400 }
-  ]
+  "toggle": { "device": "builtIn", "gesture": "tap", "key": "fn", "count": 2, "withinMs": 400 },
+  "externalOff": { "device": "external", "gesture": "hold", "keys": ["leftShift", "rightShift"], "forMs": 1000 },
+  "paused": false
 }

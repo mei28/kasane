@@ -26,8 +26,8 @@ enum TriggerText {
 
     static func problem(_ error: ConfigError) -> String {
         switch error {
-        case .noExternalOffTrigger:
-            String(localized: "Add at least one trigger on the external keyboard that turns Kasane off.")
+        case .externalOffOnBuiltIn:
+            String(localized: "Press the keys on the external keyboard.")
         case .holdOnBuiltIn:
             String(localized: "The built-in keyboard cannot have hold triggers: the external keyboard's weight could hold a key down.")
         case .unknownKey(let name):

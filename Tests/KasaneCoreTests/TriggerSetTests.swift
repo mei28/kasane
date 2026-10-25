@@ -3,7 +3,7 @@ import Testing
 
 private let fnToggle = Trigger(device: .builtIn, gesture: .tap(.fn, count: 2, within: .milliseconds(400)))
 private let shiftsHeld = Trigger(device: .external, gesture: .hold([.leftShift, .rightShift], for: .milliseconds(1000)))
-private let config = Config(on: [fnToggle], off: [shiftsHeld, fnToggle])
+private let config = Config(toggle: fnToggle, externalOff: shiftsHeld)
 
 private func event(_ key: Key, _ isDown: Bool, at ms: Int, on device: Device = .builtIn) -> KeyEvent {
     KeyEvent(device: device, usage: key.usage, isDown: isDown, time: .milliseconds(ms))
