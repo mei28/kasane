@@ -32,62 +32,12 @@
         }
       }
     },
-    "Add Kasane under Input Monitoring, then wait a few seconds.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "入力監視に Kasane を追加して、数秒待ってください。"
-          }
-        }
-      }
-    },
     "Add at least one trigger on the external keyboard that turns Kasane off.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "外付けキーボードで OFF にするトリガを、少なくとも 1 つ置いてください。"
-          }
-        }
-      }
-    },
-    "All taps within %lld ms": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld ms 以内にすべてタップ"
-          }
-        }
-      }
-    },
-    "Another recording is in progress.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ほかの記録が進んでいます。"
-          }
-        }
-      }
-    },
-    "Applied.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "適用しました。"
-          }
-        }
-      }
-    },
-    "Apply": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "適用"
           }
         }
       }
@@ -112,42 +62,12 @@
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "キャンセル"
-          }
-        }
-      }
-    },
     "Cannot reach kasaned": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "kasaned につながりません"
-          }
-        }
-      }
-    },
-    "Cannot reach kasaned.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "kasaned につながりません。"
-          }
-        }
-      }
-    },
-    "Cannot read the config from kasaned: %@": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "kasaned から設定を読めません：%@"
           }
         }
       }
@@ -168,16 +88,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "一般"
-          }
-        }
-      }
-    },
-    "Held for %lld ms": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld ms 押し続ける"
           }
         }
       }
@@ -382,32 +292,12 @@
         }
       }
     },
-    "Press the keys for the new trigger. Recording ends one second after you let go.": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "新しいトリガのキーを押してください。手を離して 1 秒たつと、記録が終わります。"
-          }
-        }
-      }
-    },
     "Quit Kasane": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "Kasane を終了"
-          }
-        }
-      }
-    },
-    "Record a Trigger…": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "トリガを記録…"
           }
         }
       }
@@ -432,32 +322,12 @@
         }
       }
     },
-    "Remove": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "削除"
-          }
-        }
-      }
-    },
     "Resume Kasane": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "Kasane を再開"
-          }
-        }
-      }
-    },
-    "Revert": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "元に戻す"
           }
         }
       }
@@ -612,16 +482,6 @@
         }
       }
     },
-    "Triggers": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "トリガ"
-          }
-        }
-      }
-    },
     "Turns off": {
       "localizations": {
         "ja": {
@@ -678,16 +538,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "kasaned が設定ファイルを使えません"
-          }
-        }
-      }
-    },
-    "kasaned could not use its config file: %@": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "kasaned が設定ファイルを使えませんでした：%@"
           }
         }
       }

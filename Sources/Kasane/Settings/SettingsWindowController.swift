@@ -5,11 +5,8 @@ import SwiftUI
 /// reliably reachable from a menu bar app (LSUIElement), so the window is opened directly.
 @MainActor
 final class SettingsWindowController: NSWindowController {
-    private let model: SettingsModel
-
-    init(client: DaemonClient, preferences: Preferences) {
-        model = SettingsModel(client: client)
-        let view = SettingsView(model: model, client: client, preferences: preferences)
+    init(preferences: Preferences) {
+        let view = SettingsView(preferences: preferences)
         let window = NSWindow(contentViewController: NSHostingController(rootView: view))
         window.title = String(localized: "Kasane Settings")
         window.styleMask = [.titled, .closable]
@@ -23,9 +20,7 @@ final class SettingsWindowController: NSWindowController {
         fatalError("SettingsWindowController is not built from a coder")
     }
 
-    /// Brings the window forward with the config kasaned has now.
     func show() {
-        Task { await model.load() }
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
     }
