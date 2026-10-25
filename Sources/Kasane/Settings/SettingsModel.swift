@@ -111,10 +111,15 @@ final class SettingsModel: ObservableObject {
         }
     }
 
-    /// Puts `trigger` in `slot` when the config still passes the rules kasaned applies.
     private func set(_ trigger: Trigger, in slot: Slot) async {
+        await change(slot) { $0[keyPath: slot.keyPath] = trigger }
+    }
+
+    /// Sends the edited config to kasaned when it still passes the rules kasaned applies. A
+    /// rejection shows under `slot`, and the config stays as it was.
+    private func change(_ slot: Slot, _ edit: (inout Config) -> Void) async {
         guard var newConfig = config else { preconditionFailure("the slots are hidden without a config") }
-        newConfig[keyPath: slot.keyPath] = trigger
+        edit(&newConfig)
         do {
             try newConfig.validate()
         } catch {
