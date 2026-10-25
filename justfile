@@ -29,9 +29,7 @@ app:
     cp .build/release/Kasane .build/release/kasaned {{app}}/Contents/MacOS/
     cp bundle/AppIcon.icns {{app}}/Contents/Resources/
     xcrun xcstringstool compile bundle/Localizable.xcstrings --output-directory {{app}}/Contents/Resources
-    codesign --force --sign "{{signing_identity}}" --identifier dev.mei.kasane {{app}}/Contents/MacOS/kasaned
-    codesign --force --sign "{{signing_identity}}" --identifier dev.mei.kasane {{app}}
-    codesign --verify --strict {{app}}
+    scripts/sign-app.sh "{{signing_identity}}" {{app}}
 
 # Redraw bundle/AppIcon.icns from scripts/app-icon.swift
 icon:
