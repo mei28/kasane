@@ -37,25 +37,40 @@ public struct Config: Codable, Equatable, Sendable {
 
     /// Throws the first rule this config breaks. parse runs it on every config it reads.
     public func validate() throws(ConfigError) {
-        guard externalOff.device == .external else {
+        let triggers: [(trigger: Trigger, isExternalOff: Bool)] = [(toggle, false), (externalOff, true)]
+        for entry in triggers {
+            try Self.check(entry.trigger, isExternalOff: entry.isExternalOff)
+        }
+        for (index, entry) in triggers.enumerated() {
+            for other in triggers[(index + 1)...] {
+                try Self.check(entry.trigger, against: other.trigger)
+            }
+        }
+    }
+
+    /// The rules for one trigger on its own.
+    private static func check(_ trigger: Trigger, isExternalOff: Bool) throws(ConfigError) {
+        if isExternalOff, trigger.device != .external {
             throw .externalOffOnBuiltIn
         }
         // The external keyboard's weight alone could hold a built-in key down.
-        if toggle.device == .builtIn, case .hold = toggle.gesture {
+        if trigger.device == .builtIn, case .hold = trigger.gesture {
             throw .holdOnBuiltIn
         }
         // One tap fires on ordinary use of the key, and more than five is hard to hit reliably.
-        for trigger in [toggle, externalOff] {
-            if case .tap(_, let count, _) = trigger.gesture, !(2...5).contains(count) {
-                throw .tapCountOutOfRange(count)
-            }
+        if case .tap(_, let count, _) = trigger.gesture, !(2...5).contains(count) {
+            throw .tapCountOutOfRange(count)
         }
+    }
+
+    /// The rules for two triggers together.
+    private static func check(_ trigger: Trigger, against other: Trigger) throws(ConfigError) {
         // Different counts on one key fire the shorter one on the way to the longer one.
-        if case .tap(let key, let count, _) = toggle.gesture,
-            case .tap(let otherKey, let otherCount, _) = externalOff.gesture,
-            toggle.device == externalOff.device, key == otherKey, count != otherCount
+        if case .tap(let key, let count, _) = trigger.gesture,
+            case .tap(let otherKey, let otherCount, _) = other.gesture,
+            trigger.device == other.device, key == otherKey, count != otherCount
         {
-            throw .conflictingTapCounts(key, toggle.device)
+            throw .conflictingTapCounts(key, trigger.device)
         }
     }
 }
