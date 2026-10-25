@@ -27,10 +27,17 @@ app:
     mkdir -p {{app}}/Contents/MacOS {{app}}/Contents/Resources
     cp bundle/Info.plist {{app}}/Contents/
     cp .build/release/Kasane .build/release/kasaned {{app}}/Contents/MacOS/
+    cp bundle/AppIcon.icns {{app}}/Contents/Resources/
     xcrun xcstringstool compile bundle/Localizable.xcstrings --output-directory {{app}}/Contents/Resources
     codesign --force --sign "{{signing_identity}}" --identifier dev.mei.kasane {{app}}/Contents/MacOS/kasaned
     codesign --force --sign "{{signing_identity}}" --identifier dev.mei.kasane {{app}}
     codesign --verify --strict {{app}}
+
+# Redraw bundle/AppIcon.icns from scripts/app-icon.swift
+icon:
+    rm -rf .build/AppIcon.iconset
+    swift scripts/app-icon.swift .build/AppIcon.iconset
+    iconutil --convert icns --output bundle/AppIcon.icns .build/AppIcon.iconset
 
 # Install Kasane.app root-owned in /Applications, (re)start kasaned, and open the app
 install: app

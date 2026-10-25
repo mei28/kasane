@@ -6,6 +6,8 @@
 	<string>dev.mei.kasane</string>
 	<key>CFBundleExecutable</key>
 	<string>Kasane</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleName</key>
 	<string>Kasane</string>
 	<key>CFBundlePackageType</key>
