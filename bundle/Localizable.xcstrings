@@ -872,12 +872,12 @@
         }
       }
     },
-    "kasaned is not running. Install it with just install.": {
+    "kasaned is not running. Install it by turning on services.kasane in nix-darwin.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "kasaned が動いていません。just install でインストールしてください。"
+            "value": "kasaned が動いていません。nix-darwin で services.kasane を有効にして入れてください。"
           }
         }
       }

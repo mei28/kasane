@@ -12,7 +12,7 @@ do {
     clientRequirement = try sameSignerRequirement()
 } catch {
     // Unsigned, kasaned cannot tell its app from any other process, so it does not run at all.
-    log("\(error); kasaned must be signed by `just app`")
+    log("\(error); kasaned must be signed by scripts/sign-app.sh")
     exit(EXIT_FAILURE)
 }
 

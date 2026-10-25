@@ -80,7 +80,7 @@ struct SettingsView: View {
         } else {
             Section {
                 Text("Cannot reach kasaned")
-                Text("kasaned is not running. Install it with just install.")
+                Text("kasaned is not running. Install it by turning on services.kasane in nix-darwin.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
