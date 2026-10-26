@@ -9,13 +9,14 @@ private func safe(but change: (inout Safety) -> Void) -> Safety {
     return safety
 }
 
-/// Each safety condition broken on its own: lock, leaving the console, sleep, last external keyboard gone.
+/// Each safety condition broken on its own: lock, leaving the console, sleep.
 private let unsafeStates = [
     safe { $0.screenLocked = true },
     safe { $0.onConsole = false },
     safe { $0.asleep = true },
-    safe { $0.externalKeyboardConnected = false },
 ]
+
+private let noExternalKeyboard = safe { $0.externalKeyboardConnected = false }
 
 @Test func startsOff() {
     #expect(!Blocker(safety: safe).isOn)
@@ -84,6 +85,30 @@ func onTriggerChecksTheLatestSafetyConditions(_ safety: Safety) {
     _ = blocker.update(safety)
 
     #expect(blocker.onTrigger() == [])
+    #expect(!blocker.isOn)
+}
+
+@Test func refusesTheOnTriggerWithoutAnExternalKeyboard() {
+    var blocker = Blocker(safety: noExternalKeyboard)
+
+    #expect(blocker.onTrigger() == [])
+    #expect(!blocker.isOn)
+}
+
+@Test func losingTheLastExternalKeyboardTurnsOff() {
+    var blocker = Blocker(safety: safe)
+    _ = blocker.onTrigger()
+
+    #expect(blocker.update(noExternalKeyboard) == [.ledOff, .release])
+    #expect(!blocker.isOn)
+}
+
+@Test func staysOffWhenAnExternalKeyboardConnectsAgain() {
+    var blocker = Blocker(safety: safe)
+    _ = blocker.onTrigger()
+    _ = blocker.update(noExternalKeyboard)
+
+    #expect(blocker.update(safe) == [])
     #expect(!blocker.isOn)
 }
 
