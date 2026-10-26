@@ -2,7 +2,8 @@
 
 kasane blocks a MacBook's built-in keyboard while an external keyboard sits on top of it. It
 unblocks the built-in keyboard whenever the external one might not be usable, so one keyboard can
-always type.
+always type. It also blocks the built-in keyboard with no external keyboard, to clean it or keep a
+cat off it, and then the block can always be undone.
 
 Status: in daily use on one MacBook. The core logic is tested; the daemon and the menu bar app
 are checked on the hardware.
@@ -63,24 +64,34 @@ Mac, nothing else lights that LED.
 The menu blocks and unblocks the built-in keyboard, and pauses kasane. While paused, kasaned
 unblocks the keyboard and ignores every trigger. Quitting the menu bar app leaves kasaned running.
 
+The same triggers and the menu block the built-in keyboard with no external keyboard connected, to
+clean the keyboard, keep a cat or a child off it, or use only the trackpad. No keyboard can type
+until the block ends, and a trigger on the built-in keyboard or the menu ends it. Two things follow:
+
+- Tapping fn twice while typing on the built-in keyboard blocks it. Tap fn twice again.
+- A cloth or a paw can press that trigger too, and the keys after it reach the app in front. A
+  shortcut on the built-in keyboard, such as ⌃⌥⌘K, is harder to press by accident, and the menu
+  needs no key at all.
+
 ## Safety
 
-kasaned keeps the built-in keyboard blocked only while all of these hold:
+kasaned keeps the built-in keyboard blocked only while the screen is unlocked, the user is on the
+console, and the system is awake. When any of them stops holding, kasaned unblocks the built-in
+keyboard and leaves it unblocked until the next trigger.
 
-- at least one keyboard other than the built-in one is connected
-- the screen is unlocked and the user is on the console
-- the system is awake
+kasaned also unblocks the built-in keyboard when the last external keyboard disconnects, since it
+may be the keyboard you type on. A block that started with no external keyboard lasts while none
+is connected.
 
-When any of them stops holding, kasaned unblocks the built-in keyboard and leaves it unblocked
-until the next trigger. Pressing the Touch ID button locks the screen and closing the lid sleeps
-the system, so either one unblocks the keyboard without touching a key.
+Besides a trigger, three things unblock the keyboard without touching a key: the menu's Unblock,
+the Touch ID button, which locks the screen, and closing the lid, which sleeps the system. On power
+with an external display, closing the lid does not sleep the Mac, so it does not unblock either.
 
 kasaned always starts unblocked. If kasaned exits, even by crashing, the kernel releases the
 built-in keyboard. If its main thread stops for 2 seconds while blocking, kasaned exits on purpose.
 
 Any keyboard that is not built in counts as external, including devices that only look like a
-keyboard, such as a YubiKey. With only such a device connected, blocking leaves no keyboard that
-can type. A trigger on the built-in keyboard, the Touch ID button, or the lid still unblocks it.
+keyboard, such as a YubiKey. Unplugging the last of them ends a block like any external keyboard.
 
 ## Settings
 
