@@ -1,4 +1,5 @@
-/// The facts that decide whether blocking the built-in keyboard is safe.
+/// The facts that decide whether blocking the built-in keyboard is safe. Blocking needs no external
+/// keyboard, but losing the last one turns it OFF (`Blocker.update`).
 public struct Safety: Codable, Equatable, Sendable {
     public var externalKeyboardConnected: Bool
     public var screenLocked: Bool
@@ -12,9 +13,8 @@ public struct Safety: Codable, Equatable, Sendable {
         self.asleep = asleep
     }
 
-    /// Blocking is safe only while some keyboard other than the built-in one can still type.
     public var permitsBlocking: Bool {
-        externalKeyboardConnected && !screenLocked && onConsole && !asleep
+        !screenLocked && onConsole && !asleep
     }
 }
 
@@ -59,9 +59,12 @@ public struct Blocker: Sendable {
         }
     }
 
+    /// Turns OFF when blocking stops being safe, or when the last external keyboard goes: it may
+    /// be the one the user types on. Blocking that started without one lasts while none is there.
     public mutating func update(_ safety: Safety) -> [Effect] {
+        let lostLastExternalKeyboard = self.safety.externalKeyboardConnected && !safety.externalKeyboardConnected
         self.safety = safety
-        guard isOn, !safety.permitsBlocking else { return [] }
+        guard isOn, !safety.permitsBlocking || lostLastExternalKeyboard else { return [] }
         return turnOff()
     }
 

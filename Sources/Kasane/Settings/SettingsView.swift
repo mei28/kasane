@@ -135,9 +135,7 @@ struct SettingsView: View {
                 }
                 switch action {
                 case .toggle:
-                    Text(
-                        "Blocks the built-in keyboard, and unblocks it when pressed again. Blocking works only while an external keyboard is connected."
-                    )
+                    Text("Blocks the built-in keyboard, and unblocks it when pressed again.")
                 case .externalOff:
                     Text(
                         "Unblocks the built-in keyboard from the external one, for when the keys above are out of reach. Only keys pressed on the external keyboard can be recorded."

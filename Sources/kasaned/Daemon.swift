@@ -93,7 +93,7 @@ final class Daemon {
 
     func setBlocked(_ blocked: Bool) -> Data {
         if blocked {
-            // Without a config there is no key to turn OFF again.
+            // While the config is broken nothing is blocked; the settings window offers to restore it.
             if config == nil {
                 log("block from the menu refused; no usable config")
             } else if recording == nil {
@@ -238,7 +238,7 @@ final class Daemon {
         guard next != safety else { return }
         safety = next
         log(describe(next))
-        transition("a safety condition no longer holds") { $0.update(next) }
+        transition("the safety conditions changed") { $0.update(next) }
         publish()
     }
 

@@ -88,10 +88,39 @@ func onTriggerChecksTheLatestSafetyConditions(_ safety: Safety) {
     #expect(!blocker.isOn)
 }
 
-@Test func refusesTheOnTriggerWithoutAnExternalKeyboard() {
+/// For cleaning the keyboard, or keeping a cat off it.
+@Test func onTriggerTurnsOnWithoutAnExternalKeyboard() {
     var blocker = Blocker(safety: noExternalKeyboard)
 
-    #expect(blocker.onTrigger() == [])
+    #expect(blocker.onTrigger() == [.seize, .ledOn])
+    #expect(blocker.isOn)
+}
+
+@Test func blockingWithoutAnExternalKeyboardLastsWhileStillNoneIsConnected() {
+    var blocker = Blocker(safety: noExternalKeyboard)
+    _ = blocker.onTrigger()
+
+    #expect(blocker.update(noExternalKeyboard) == [])
+    #expect(blocker.isOn)
+}
+
+@Test(arguments: unsafeStates)
+func losingASafetyConditionTurnsOffBlockingWithoutAnExternalKeyboard(_ unsafe: Safety) {
+    var blocker = Blocker(safety: noExternalKeyboard)
+    _ = blocker.onTrigger()
+    var safety = unsafe
+    safety.externalKeyboardConnected = false
+
+    #expect(blocker.update(safety) == [.ledOff, .release])
+    #expect(!blocker.isOn)
+}
+
+@Test func losingAnExternalKeyboardConnectedAfterBlockingTurnsOff() {
+    var blocker = Blocker(safety: noExternalKeyboard)
+    _ = blocker.onTrigger()
+    _ = blocker.update(safe)
+
+    #expect(blocker.update(noExternalKeyboard) == [.ledOff, .release])
     #expect(!blocker.isOn)
 }
 

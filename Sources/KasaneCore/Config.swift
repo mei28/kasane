@@ -87,8 +87,8 @@ public struct Config: Codable, Equatable, Sendable {
     }
 }
 
-/// A config that could leave the user without a working keyboard. kasaned runs without triggers
-/// rather than use one, and the app checks each change against these before sending it.
+/// Why kasaned refuses a config. kasaned runs without triggers rather than use one, and the app
+/// checks each change against these before sending it.
 public enum ConfigError: Error, Codable, Equatable, Sendable {
     case noExternalOffTrigger
     case externalOffOnBuiltIn

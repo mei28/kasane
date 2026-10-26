@@ -15,7 +15,6 @@ enum MenuText {
         }
         if status.isPaused { return String(localized: "Kasane is paused") }
         if status.isOn { return String(localized: "The built-in keyboard is blocked") }
-        if !status.safety.externalKeyboardConnected { return String(localized: "Waiting for an external keyboard") }
         return String(localized: "The built-in keyboard works")
     }
 

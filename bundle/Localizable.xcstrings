@@ -102,12 +102,12 @@
         }
       }
     },
-    "Blocks the built-in keyboard, and unblocks it when pressed again. Blocking works only while an external keyboard is connected.": {
+    "Blocks the built-in keyboard, and unblocks it when pressed again.": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "内蔵キーボードを止めます。止めているときに押すと戻します。外付けキーボードがつながっている間だけ止められます。"
+            "value": "内蔵キーボードを止めます。止めているときに押すと戻します。"
           }
         }
       }
@@ -798,16 +798,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "知らないキーです：%@"
-          }
-        }
-      }
-    },
-    "Waiting for an external keyboard": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "外付けキーボードを待っています"
           }
         }
       }
